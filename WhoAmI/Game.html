@@ -7,7 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="https://chirpss.github.io/icon_2.png">
+    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -207,7 +207,7 @@
                    if(endBtn) endBtn.classList.remove('hidden');
                 }, 1000);
 
-                const joinUrl = `https://chirpss.github.io/En/Join/?code=${code}`;
+                const joinUrl = `https://gc.fynn.qzz.io/En/Join/?code=${code}`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(joinUrl)}`;
                 document.getElementById('qr-area').innerHTML = `<img src="${qrUrl}" alt="QR">`;
 

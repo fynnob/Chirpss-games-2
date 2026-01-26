@@ -40,14 +40,14 @@ class ChirpssHeader extends HTMLElement {
         this.innerHTML = `
         <header class="fixed w-full top-0 z-50 transition-all duration-300 backdrop-blur-md bg-deep-twilight/80 border-b border-white/10">
             <div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-                <a href="https://chirpss.github.io/En/" class="flex items-center gap-2 group">
+                <a href="https://gc.fynn.qzz.io/En/" class="flex items-center gap-2 group">
                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-warm-dusk to-fiery-core flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:scale-110 transition-transform">
                         C
                     </div>
                     <span class="text-xl font-bold tracking-tight text-white group-hover:text-fiery-core transition-colors">CHIRPSS</span>
                 </a>
                 
-                <button onclick="window.location.href='https://chirpss.github.io/En/Join/'" 
+                <button onclick="window.location.href='https://gc.fynn.qzz.io/En/Join/'" 
                     class="px-5 py-2 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-bold rounded-full shadow-lg hover:shadow-orange-500/20 active:scale-95 transition-all text-sm flex items-center gap-2">
                     <span>Join Room</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -73,9 +73,9 @@ class ChirpssFooter extends HTMLElement {
                     </select>
                 </div>
                 <div class="flex justify-center flex-wrap gap-8 text-sm text-subtle-gray mb-8 font-medium">
-                    <a href="https://chirpss.github.io/En/Impressum" class="hover:text-warm-dusk transition-colors">Impressum</a>
-                    <a href="https://chirpss.github.io/En/privacy" class="hover:text-warm-dusk transition-colors">Privacy</a>
-                    <a href="https://chirpss.github.io/En/cookies" class="hover:text-warm-dusk transition-colors">Cookies</a>
+                    <a href="https://gc.fynn.qzz.io/En/Impressum" class="hover:text-warm-dusk transition-colors">Impressum</a>
+                    <a href="https://gc.fynn.qzz.io/En/privacy" class="hover:text-warm-dusk transition-colors">Privacy</a>
+                    <a href="https://gc.fynn.qzz.io/En/cookies" class="hover:text-warm-dusk transition-colors">Cookies</a>
                 </div>
                 <p class="text-xs text-subtle-gray/40 font-mono">© 2026 CHIRPSS. NO DOWNLOADS. NO ADS.</p>
             </div>
@@ -90,5 +90,5 @@ customElements.define('chirpss-footer', ChirpssFooter);
 window.changeLanguage = function(selectObject) {
     const lang = selectObject.value;
     localStorage.setItem('preferredLanguage', lang);
-    if (lang.toLowerCase() === 'de') window.location.href = 'https://chirpss.github.io/De/';
+    if (lang.toLowerCase() === 'de') window.location.href = 'https://gc.fynn.qzz.io/De/';
 };
