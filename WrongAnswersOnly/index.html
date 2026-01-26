@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Wrong Answers Only - Setup</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://chirpss.github.io/icon_2.png">
+
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+    <script src="https://cdn.fynn.qzz.io/cookies.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: transform 0.1s linear; z-index: 0; }
+        
+        input[type=range]::-webkit-slider-runnable-track { background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #ec4899; margin-top: -6px; cursor: pointer; border: 2px solid white; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-deep-twilight">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-pink-500/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-rose-500/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 max-w-2xl mx-auto p-4 sm:p-8 flex-grow w-full">
+        <div class="text-center mb-8 animate-fade-in-up">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-500">Wrong Answers Only</h2>
+            <p class="text-subtle-gray text-sm mt-2 font-medium">The worse you answer, the better you do.</p>
+        </div>
+
+        <div class="bg-card-bg/60 border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+            <form id="wao-settings-form" class="space-y-8">
+                
+                <div>
+                    <label class="block text-sm font-bold text-pink-500 uppercase tracking-widest mb-3">Add Players</label>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="player-input" placeholder="Name" class="flex-grow bg-white/5 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-pink-500 text-white">
+                        <button type="button" onclick="addPlayer()" class="bg-pink-500 text-white px-6 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all">Add</button>
+                    </div>
+                    <div id="player-list" class="flex flex-wrap gap-2 min-h-[40px]"></div>
+                    <p class="text-[10px] text-subtle-gray mt-2 font-bold uppercase tracking-widest" id="player-count-display">Players: 0 (Min 2)</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-subtle-gray mb-2 uppercase tracking-widest">Time per Question: <span id="question-time-display" class="text-rose-400">10s</span></label>
+                    <input type="range" id="question-time-slider" min="5" max="30" value="10" step="5" class="w-full h-2 appearance-none cursor-pointer bg-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-pink-500 uppercase tracking-widest mb-4">Prompt Categories</label>
+                    <div id="categories-container" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <button type="submit" id="start-game-btn" class="w-full py-4 bg-gray-600 text-white font-extrabold text-xl rounded-xl shadow-lg transition-all" disabled>START SURVIVAL</button>
+            </form>
+        </div>
+    </main>
+
+    <chirpss-footer></chirpss-footer>
+
+    <script>
+        const CATEGORY_URL = 'https://cdn.fynn.qzz.io/WAO/Questions.json';
+        
+        let state = JSON.parse(localStorage.getItem('chirpss_wao_full_state')) || {
+            players: [],
+            timeLimit: 10,
+            selectedCats: []
+        };
+
+        function saveState() {
+            localStorage.setItem('chirpss_wao_full_state', JSON.stringify(state));
+            updateUI();
+        }
+
+        function updateUI() {
+            const isReady = state.players.length >= 2 && state.selectedCats.length > 0;
+            const btn = document.getElementById('start-game-btn');
+            btn.disabled = !isReady;
+            btn.className = isReady 
+                ? "w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-extrabold text-xl rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all" 
+                : "w-full py-4 bg-gray-600 text-gray-400 font-extrabold text-xl rounded-xl cursor-not-allowed";
+            
+            document.getElementById('player-count-display').textContent = `PLAYERS: ${state.players.length} (MIN 2)`;
+            document.getElementById('question-time-display').textContent = `${state.timeLimit}s`;
+            renderPlayers();
+        }
+
+        function renderPlayers() {
+            document.getElementById('player-list').innerHTML = state.players.map(p => `
+                <div class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-sm font-bold flex items-center gap-2">
+                    ${p} <button type="button" onclick="removePlayer('${p}')" class="text-pink-500">×</button>
+                </div>`).join('');
+        }
+
+        function addPlayer() {
+            const input = document.getElementById('player-input');
+            const name = input.value.trim();
+            if(name && !state.players.includes(name)) {
+                state.players.push(name);
+                input.value = '';
+                saveState();
+            }
+        }
+
+        function removePlayer(name) {
+            state.players = state.players.filter(p => p !== name);
+            saveState();
+        }
+
+        async function fetchCats() {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = `<p class="text-xs animate-pulse">Summoning prompts...</p>`;
+            try {
+                const res = await fetch(CATEGORY_URL);
+                const data = await res.json();
+                window.all_categories = data.c;
+                container.innerHTML = data.c.map(cat => {
+                    const active = state.selectedCats.includes(cat.n);
+                    return `<button type="button" onclick="toggleCat('${cat.n}', this)" class="px-3 py-2 rounded-xl border ${active ? 'border-pink-500 bg-pink-500 text-white shadow-lg shadow-pink-500/20' : 'border-white/10 bg-white/5'} text-xs font-bold transition-all">${cat.n}</button>`;
+                }).join('');
+            } catch(e) { container.innerHTML = `<p class="text-rose-500 text-xs">Failed to load categories.</p>`; }
+        }
+
+        function toggleCat(name, btn) {
+            if(state.selectedCats.includes(name)) state.selectedCats = state.selectedCats.filter(c => c !== name);
+            else state.selectedCats.push(name);
+            saveState();
+            btn.className = state.selectedCats.includes(name) 
+                ? "px-3 py-2 rounded-xl border border-pink-500 bg-pink-500 text-white shadow-lg shadow-pink-500/20 text-xs font-bold transition-all" 
+                : "px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-bold transition-all";
+        }
+
+        document.getElementById('question-time-slider').addEventListener('input', (e) => {
+            state.timeLimit = e.target.value;
+            saveState();
+        });
+
+        document.getElementById('player-input').addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); addPlayer(); }});
+
+        document.getElementById('wao-settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const prompts = window.all_categories.filter(c => state.selectedCats.includes(c.n)).flatMap(c => c.p);
+            sessionStorage.setItem('wao_game_data', JSON.stringify({
+                players: state.players,
+                timePerQuestion: state.timeLimit,
+                prompts: prompts
+            }));
+            window.location.href = './Game.html';
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('question-time-slider').value = state.timeLimit;
+            updateUI(); fetchCats();
+        });
+    </script>
+</body>
+</html>

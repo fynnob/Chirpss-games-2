@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Rate The Flaw</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://chirpss.github.io/icon_2.png">
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; min-height: 100vh; }
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: #1e293b; border-radius: 4px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #eab308; cursor: pointer; border: 2px solid #0f172a; }
+        .vis-bar { transition: height 0.5s ease; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-slate-900 border border-white/10 p-8 rounded-3xl shadow-2xl relative">
+        <h2 id="main-prompt" class="text-sm font-bold text-green-400 uppercase tracking-widest mb-2">...</h2>
+        <p id="but-prompt" class="text-2xl font-extrabold text-white leading-tight mb-8">...</p>
+
+        <div id="rating-ui">
+            <div class="flex justify-between items-end mb-4">
+                <span class="text-xs font-bold text-gray-500 uppercase">Your Vote</span>
+                <span class="text-3xl font-black text-yellow-400" id="rating-val">5</span>
+            </div>
+            <input type="range" min="1" max="10" value="5" oninput="document.getElementById('rating-val').textContent = this.value">
+            <button onclick="submitVote()" class="mt-6 w-full py-3 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-bold rounded-xl shadow-lg">VOTE</button>
+        </div>
+
+        <div id="results-ui" class="hidden">
+            <div class="h-32 flex items-end justify-between gap-1 mb-6" id="vis-grid"></div>
+            <a href="index.html" class="block w-full py-3 text-center bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all">Play Full Game</a>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdgoyDsUteoRBIQ74NXvg5Xfj8V105Dnw",
+            authDomain: "chirpssgames.firebaseapp.com",
+            databaseURL: "https://chirpssgames-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "chirpssgames",
+            storageBucket: "chirpssgames.firebasestorage.app",
+            messagingSenderId: "949878456642",
+            appId: "1:949878456642:web:4287fe5fe9577ce1b688db"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const dbRef = firebase.database().ref('tenbut_ratings');
+        const params = new URLSearchParams(window.location.search);
+        const g = params.get('g');
+        const t = params.get('t');
+        let pid;
+
+        if(g && t) {
+            const pronoun = g === 'boy' ? 'He' : (g === 'girl' ? 'She' : 'They');
+            const verb = g === 'trans' ? 'are' : 'is';
+            document.getElementById('main-prompt').textContent = `${pronoun} ${verb} a 10 but...`;
+            document.getElementById('but-prompt').textContent = t;
+            pid = btoa(encodeURIComponent(`${g}:${t}`)).replace(/[/+=]/g, '');
+        } else {
+            document.getElementById('but-prompt').textContent = "Invalid Link";
+            document.getElementById('rating-ui').classList.add('hidden');
+        }
+
+        function submitVote() {
+            const val = document.getElementById('rating-val').textContent;
+            document.querySelector('button').textContent = "...";
+            dbRef.child(pid).child(val).transaction(c => (c||0)+1, (e, c) => {
+                if(c) showResults();
+            });
+        }
+
+        function showResults() {
+            document.getElementById('rating-ui').classList.add('hidden');
+            document.getElementById('results-ui').classList.remove('hidden');
+            dbRef.child(pid).on('value', snap => {
+                const d = snap.val() || {};
+                const grid = document.getElementById('vis-grid');
+                grid.innerHTML = '';
+                let max = 0;
+                for(let i=1; i<=10; i++) if((d[i]||0)>max) max=d[i];
+                for(let i=1; i<=10; i++) {
+                     let color = i<5 ? 'bg-red-500' : (i<8 ? 'bg-yellow-400' : 'bg-green-500');
+                     let h = max > 0 ? ((d[i]||0)/max)*100 : 0;
+                     grid.innerHTML += `<div class="flex-1 bg-slate-800 rounded-sm relative flex items-end"><div class="${color} w-full rounded-t-sm" style="height:${Math.max(h,5)}%"></div></div>`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

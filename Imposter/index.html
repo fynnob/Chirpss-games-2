@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Imposter Setup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://chirpss.github.io/icon_2.png">
+
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+    <script src="https://cdn.fynn.qzz.io/cookies.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: transform 0.1s linear; z-index: 0; }
+        input[type=range]::-webkit-slider-runnable-track { background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #F97316; margin-top: -6px; cursor: pointer; border: 2px solid white; }
+        summary { list-style: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-deep-twilight">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-warm-dusk/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-purple-500/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 max-w-2xl mx-auto p-4 sm:p-8 flex-grow w-full">
+        <div class="text-center mb-8 animate-fade-in-up">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-warm-dusk to-fiery-core">Imposter Setup</h2>
+        </div>
+
+        <div class="bg-card-bg/60 border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+            <form id="imposter-settings-form" class="space-y-8">
+                
+                <div>
+                    <label class="block text-sm font-bold text-warm-dusk uppercase tracking-widest mb-3">Add Players</label>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="player-input" placeholder="Name" class="flex-grow bg-white/5 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-warm-dusk text-white">
+                        <button type="button" onclick="addPlayer()" class="bg-warm-dusk text-white px-6 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all">Add</button>
+                    </div>
+                    <div id="player-list" class="flex flex-wrap gap-2 min-h-[40px]"></div>
+                    <p class="text-[10px] text-subtle-gray mt-2 font-bold" id="player-count-display">PLAYERS: 0 (MIN 3)</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-subtle-gray mb-2">IMPOSTERS: <span id="imposter-count-value" class="text-fiery-core">1</span></label>
+                        <input type="range" id="imposter-count-slider" min="1" max="5" value="1" class="w-full h-2 appearance-none cursor-pointer bg-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-subtle-gray mb-2">TIME LIMIT: <span id="game-time-display" class="text-fiery-core">5 min</span></label>
+                        <input type="range" id="game-time-slider" min="0.5" max="15" value="5" step="0.5" class="w-full h-2 appearance-none cursor-pointer bg-transparent">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                    <span class="text-sm font-bold">Imposter gets a Hint</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="imposter-hint-toggle" checked class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:bg-warm-dusk after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                    </label>
+                </div>
+
+                <div class="space-y-4">
+                    <details class="group bg-white/5 rounded-xl border border-white/5 overflow-hidden" open>
+                        <summary class="p-4 font-bold text-sm flex justify-between cursor-pointer group-open:bg-white/5">Word Categories (Set 1) <span class="text-warm-dusk">▼</span></summary>
+                        <div id="categories-container-1" class="p-4 flex flex-wrap gap-2"></div>
+                    </details>
+                    <details class="group bg-white/5 rounded-xl border border-white/5 overflow-hidden">
+                        <summary class="p-4 font-bold text-sm flex justify-between cursor-pointer group-open:bg-white/5">Word Categories (Set 2) <span class="text-warm-dusk">▼</span></summary>
+                        <div id="categories-container-2" class="p-4 flex flex-wrap gap-2"></div>
+                    </details>
+                </div>
+
+                <button type="submit" id="start-game-btn" class="w-full py-4 bg-gray-600 text-white font-extrabold text-xl rounded-xl shadow-lg transition-all" disabled>START GAME</button>
+            </form>
+        </div>
+    </main>
+
+    <chirpss-footer></chirpss-footer>
+
+    <script>
+        const CATEGORY_URL_1 = 'https://cdn.fynn.qzz.io/imposter/categories.json';
+        const CATEGORY_URL_2 = 'https://cdn.fynn.qzz.io/imposter/categories2.json';
+        
+        let state = JSON.parse(localStorage.getItem('chirpss_imposter_full_state')) || {
+            players: [],
+            imposterCount: 1,
+            gameTime: 5,
+            hintsOn: true,
+            cats1: [],
+            cats2: []
+        };
+
+        function saveState() {
+            localStorage.setItem('chirpss_imposter_full_state', JSON.stringify(state));
+            updateUI();
+        }
+
+        function updateUI() {
+            const isReady = state.players.length >= 3 && (state.cats1.length > 0 || state.cats2.length > 0);
+            const btn = document.getElementById('start-game-btn');
+            btn.disabled = !isReady;
+            btn.className = isReady ? "w-full py-4 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-extrabold text-xl rounded-xl shadow-lg" : "w-full py-4 bg-gray-600 text-gray-400 font-extrabold text-xl rounded-xl cursor-not-allowed";
+            document.getElementById('player-count-display').textContent = `PLAYERS: ${state.players.length} (MIN 3)`;
+            document.getElementById('imposter-count-value').textContent = state.imposterCount;
+            document.getElementById('game-time-display').textContent = state.gameTime == 0.5 ? '30 sec' : `${state.gameTime} min`;
+            renderPlayers();
+        }
+
+        function renderPlayers() {
+            document.getElementById('player-list').innerHTML = state.players.map(p => `
+                <div class="bg-warm-dusk/20 text-warm-dusk border border-warm-dusk/30 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                    ${p} <button type="button" onclick="removePlayer('${p}')">×</button>
+                </div>`).join('');
+        }
+
+        function addPlayer() {
+            const name = document.getElementById('player-input').value.trim();
+            if(name && !state.players.includes(name)) {
+                state.players.push(name);
+                document.getElementById('player-input').value = '';
+                saveState();
+            }
+        }
+
+        function removePlayer(name) {
+            state.players = state.players.filter(p => p !== name);
+            saveState();
+        }
+
+        // Event Listeners for Persistence
+        document.getElementById('imposter-count-slider').addEventListener('input', (e) => { state.imposterCount = e.target.value; saveState(); });
+        document.getElementById('game-time-slider').addEventListener('input', (e) => { state.gameTime = e.target.value; saveState(); });
+        document.getElementById('imposter-hint-toggle').addEventListener('change', (e) => { state.hintsOn = e.target.checked; saveState(); });
+        document.getElementById('player-input').addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); addPlayer(); }});
+
+        async function init() {
+            try {
+                const [r1, r2] = await Promise.all([fetch(CATEGORY_URL_1), fetch(CATEGORY_URL_2)]);
+                const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+                renderCats(d1.c, 1); renderCats(d2.c, 2);
+            } catch(e) { console.error(e); }
+            
+            // Sync values back to HTML
+            document.getElementById('imposter-count-slider').value = state.imposterCount;
+            document.getElementById('game-time-slider').value = state.gameTime;
+            document.getElementById('imposter-hint-toggle').checked = state.hintsOn;
+            updateUI();
+        }
+
+        function renderCats(cats, set) {
+            const container = document.getElementById(`categories-container-${set}`);
+            container.innerHTML = cats.map(cat => {
+                const isSel = (set === 1 ? state.cats1 : state.cats2).includes(cat.n);
+                return `<button type="button" onclick="toggleCat(${set}, '${cat.n}', this)" class="px-3 py-1.5 rounded-lg border ${isSel ? 'border-warm-dusk bg-warm-dusk text-white' : 'border-white/10 bg-white/5'} text-xs font-bold">${cat.n}</button>`;
+            }).join('');
+            
+            // Global storage of data for form submission
+            window[`available_cats_${set}`] = cats;
+        }
+
+        function toggleCat(set, name, btn) {
+            const list = set === 1 ? state.cats1 : state.cats2;
+            if(list.includes(name)) list.splice(list.indexOf(name), 1);
+            else list.push(name);
+            saveState();
+            btn.className = list.includes(name) ? "px-3 py-1.5 rounded-lg border border-warm-dusk bg-warm-dusk text-white text-xs font-bold" : "px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-xs font-bold";
+        }
+
+        document.getElementById('imposter-settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const allCats = window.available_cats_1.filter(c => state.cats1.includes(c.n)).concat(window.available_cats_2.filter(c => state.cats2.includes(c.n))).map(c => ({ name: c.n, words: c.w }));
+            sessionStorage.setItem('chirpss_imposter_game_data', JSON.stringify({
+                players: state.players,
+                imposterCount: state.imposterCount,
+                gameTimeSeconds: state.gameTime * 60,
+                hintEnabled: state.hintsOn,
+                categories: allCats
+            }));
+            window.location.href = './RevealRole.html';
+        });
+
+        init();
+    </script>
+</body>
+</html>

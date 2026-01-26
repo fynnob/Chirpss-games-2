@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Imposter Game</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; }
+        .timer-val { font-size: 8rem; font-weight: 900; line-height: 1; letter-spacing: -0.05em; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
+        
+        /* Modal Animation */
+        #confirm-modal { transition: opacity 0.3s ease, visibility 0.3s; }
+        #confirm-modal.hidden { opacity: 0; visibility: hidden; display: flex; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-deep-twilight">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-warm-dusk/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-purple-500/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+
+    <div id="confirm-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-deep-twilight/80 backdrop-blur-md">
+        <div class="bg-card-bg border border-white/10 p-8 rounded-3xl max-w-sm w-full shadow-2xl text-center scale-95 animate-in fade-in zoom-in duration-300">
+            <h3 class="text-2xl font-black mb-2">End Round?</h3>
+            <p class="text-subtle-gray text-sm mb-8">Are you sure you want to stop the timer and start the voting process?</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl font-bold">Cancel</button>
+                <button onclick="confirmEndRound()" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-600/20">End Now</button>
+            </div>
+        </div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
+        
+        <div id="timer-state" class="text-center">
+            <div id="start-player-box" class="bg-warm-dusk/20 border border-warm-dusk/30 px-6 py-2 rounded-full mb-8 inline-block">
+                <p id="start-player-announcement" class="text-warm-dusk font-bold text-sm uppercase tracking-widest"></p>
+            </div>
+            <h2 id="timer-heading" class="text-sm font-bold text-subtle-gray uppercase tracking-widest mb-4">Discussion Round</h2>
+            <div id="timer" class="timer-val text-white mb-12">05:00</div>
+            
+            <div class="flex gap-4">
+                <button onclick="toggleTimer()" id="pause-button" class="px-10 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold hover:bg-white/10 transition-all">PAUSE</button>
+                <button onclick="openModal()" class="px-10 py-4 bg-red-600 rounded-2xl font-bold text-white shadow-lg hover:scale-105 active:scale-95 transition-all">END ROUND</button>
+            </div>
+        </div>
+
+        <div id="results-state" class="hidden text-center max-w-sm w-full bg-card-bg/60 border border-white/10 p-8 rounded-3xl backdrop-blur-xl">
+            <h2 id="results-heading" class="text-4xl font-black mb-6">TIME'S UP</h2>
+            <p class="text-subtle-gray text-sm mb-8">Discuss one final time and vote for the imposter.</p>
+            <button onclick="revealImposter()" id="reveal-button" class="w-full py-4 bg-gradient-to-r from-warm-dusk to-fiery-core rounded-2xl font-black text-white text-xl">REVEAL IMPOSTER</button>
+            
+            <div id="imposter-details" class="hidden mt-8 space-y-4">
+                <div class="p-6 bg-red-600/20 border border-red-600/30 rounded-2xl">
+                    <p class="text-xs font-bold text-red-500 uppercase mb-1">The Imposter</p>
+                    <p id="imposter-name" class="text-3xl font-black text-white"></p>
+                </div>
+                <div class="p-6 bg-white/5 border border-white/10 rounded-2xl">
+                    <p class="text-xs font-bold text-subtle-gray uppercase mb-1">Secret Word</p>
+                    <p id="secret-word" class="text-2xl font-black text-fiery-core"></p>
+                </div>
+                <button onclick="location.href='./index.html'" class="w-full py-4 bg-white text-black font-bold rounded-2xl mt-4">PLAY AGAIN</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let data = JSON.parse(sessionStorage.getItem('chirpss_imposter_game_data'));
+        let roles = JSON.parse(sessionStorage.getItem('chirpss_imposter_assigned_roles'));
+        let timeRemaining = data.gameTimeSeconds;
+        let timerInterval;
+        let isPaused = false;
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if(timeRemaining <= 0) { clearInterval(timerInterval); handleTimeUp(); return; }
+                timeRemaining--;
+                const min = Math.floor(timeRemaining/60);
+                const sec = timeRemaining % 60;
+                document.getElementById('timer').textContent = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        function toggleTimer() {
+            isPaused = !isPaused;
+            if(isPaused) { clearInterval(timerInterval); document.getElementById('pause-button').textContent = 'RESUME'; }
+            else { startTimer(); document.getElementById('pause-button').textContent = 'PAUSE'; }
+        }
+
+        // --- MODAL LOGIC ---
+        function openModal() { document.getElementById('confirm-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('confirm-modal').classList.add('hidden'); }
+        function confirmEndRound() { closeModal(); handleTimeUp(); }
+
+        function handleTimeUp() {
+            document.getElementById('timer-state').classList.add('hidden');
+            document.getElementById('results-state').classList.remove('hidden');
+        }
+
+        function revealImposter() {
+            document.getElementById('reveal-button').classList.add('hidden');
+            document.getElementById('imposter-details').classList.remove('hidden');
+            const imps = Object.keys(roles).filter(k => roles[k].isImp);
+            document.getElementById('imposter-name').textContent = imps.join(' & ');
+            document.getElementById('secret-word').textContent = roles[imps[0]].word;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const players = Object.keys(roles);
+            document.getElementById('start-player-announcement').textContent = `${players[Math.floor(Math.random()*players.length)]} Starts!`;
+            startTimer();
+        });
+    </script>
+</body>
+</html>

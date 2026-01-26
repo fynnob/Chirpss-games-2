@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHIRPSS | 10/10 But</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://chirpss.github.io/icon_2.png">
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; min-height: 100vh; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
+        
+        /* Custom Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: #1e293b; border-radius: 4px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #eab308; cursor: pointer; border: 2px solid #0f172a; box-shadow: 0 0 10px rgba(234, 179, 8, 0.5); transition: transform 0.1s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+        /* Visualization Bars */
+        .vis-bar { transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="flex flex-col relative">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-green-500/10 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
+        <div class="max-w-xl w-full">
+
+            <div id="gender-chooser" class="text-center animate-fade-in-up">
+                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-green-500 mb-2">Rate The Flaw</h1>
+                <p class="text-subtle-gray mb-8">Who are we judging?</p>
+                <div class="flex gap-3">
+                    <button onclick="setGender('boy')" class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-blue-400 hover:bg-blue-500/10 transition-all font-bold text-blue-400">Boy</button>
+                    <button onclick="setGender('trans')" class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-purple-400 hover:bg-purple-500/10 transition-all font-bold text-purple-400">They</button>
+                    <button onclick="setGender('girl')" class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-pink-400 hover:bg-pink-500/10 transition-all font-bold text-pink-400">Girl</button>
+                </div>
+            </div>
+
+            <div id="game-display" class="hidden">
+                
+                <div class="bg-card-bg/80 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-2xl relative mb-8">
+                    <button onclick="shareLink()" class="absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    </button>
+                    <h2 id="main-prompt" class="text-xl font-bold text-green-400 uppercase tracking-widest mb-2">...</h2>
+                    <p id="but-prompt" class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">...</p>
+                </div>
+
+                <div id="rating-section">
+                    <div class="flex justify-between items-end mb-4 px-2">
+                        <span class="text-subtle-gray font-bold text-xs uppercase tracking-widest">Your Rating</span>
+                        <span class="text-4xl font-black text-yellow-400"><span id="rating-val">5</span><span class="text-lg text-white/30">/10</span></span>
+                    </div>
+                    
+                    <input type="range" id="rating-slider" min="1" max="10" value="5" oninput="updateRating(this.value)">
+                    
+                    <button id="submit-btn" onclick="submitRating()" class="mt-8 w-full py-4 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-extrabold text-lg rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+                        LOCK IN RATING
+                    </button>
+                </div>
+
+                <div id="results-section" class="hidden animate-fade-in-up">
+                    <div class="h-32 flex items-end justify-between gap-1 mb-8" id="vis-grid">
+                        </div>
+                    
+                    <div class="flex gap-2">
+                         <button onclick="nextRound('boy')" class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-blue-500/20 hover:border-blue-400 text-white rounded-xl font-bold text-sm transition-all">Boy</button>
+                         <button onclick="nextRound('trans')" class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-purple-500/20 hover:border-purple-400 text-white rounded-xl font-bold text-sm transition-all">They</button>
+                         <button onclick="nextRound('girl')" class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-pink-500/20 hover:border-pink-400 text-white rounded-xl font-bold text-sm transition-all">Girl</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdgoyDsUteoRBIQ74NXvg5Xfj8V105Dnw",
+            authDomain: "chirpssgames.firebaseapp.com",
+            databaseURL: "https://chirpssgames-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "chirpssgames",
+            storageBucket: "chirpssgames.firebasestorage.app",
+            messagingSenderId: "949878456642",
+            appId: "1:949878456642:web:4287fe5fe9577ce1b688db"
+        };
+
+        let gameData, dbRef, currentPromptId, currentRating = 5;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const stored = sessionStorage.getItem('tenbut_game_data');
+            if(!stored) return window.location.href = 'index.html';
+            gameData = JSON.parse(stored);
+            
+            firebase.initializeApp(firebaseConfig);
+            dbRef = firebase.database().ref('tenbut_ratings');
+
+            if(gameData.gender) setGender(gameData.gender);
+        });
+
+        function setGender(g) {
+            gameData.gender = g;
+            sessionStorage.setItem('tenbut_game_data', JSON.stringify(gameData));
+            
+            document.getElementById('gender-chooser').classList.add('hidden');
+            document.getElementById('game-display').classList.remove('hidden');
+            
+            loadPrompt();
+        }
+
+        function loadPrompt() {
+            const g = gameData.gender;
+            const prompts = gameData.promptsByGender[g];
+            const idx = gameData.currentIndex[g];
+            
+            if(idx >= prompts.length) return alert("All done for this gender!");
+
+            const txt = prompts[idx];
+            const pronoun = g === 'boy' ? 'He' : (g === 'girl' ? 'She' : 'They');
+            const verb = g === 'trans' ? 'are' : 'is';
+            
+            document.getElementById('main-prompt').textContent = `${pronoun} ${verb} a 10 but...`;
+            document.getElementById('but-prompt').textContent = txt;
+            
+            // Generate ID for Firebase
+            currentPromptId = btoa(encodeURIComponent(`${g}:${txt}`)).replace(/[/+=]/g, ''); // Simple safe hash
+
+            // Reset UI
+            document.getElementById('rating-section').classList.remove('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('rating-slider').value = 5;
+            updateRating(5);
+        }
+
+        function updateRating(val) {
+            currentRating = val;
+            document.getElementById('rating-val').textContent = val;
+        }
+
+        function submitRating() {
+            const btn = document.getElementById('submit-btn');
+            btn.textContent = "LOCKING IN...";
+            btn.disabled = true;
+
+            dbRef.child(currentPromptId).child(currentRating).transaction(curr => (curr || 0) + 1, (err, committed) => {
+                if(committed) {
+                    btn.textContent = "LOCK IN RATING";
+                    btn.disabled = false;
+                    showResults();
+                } else {
+                    alert("Error submitting. Try again.");
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        function showResults() {
+            document.getElementById('rating-section').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            
+            // Listen for live updates
+            dbRef.child(currentPromptId).on('value', snap => {
+                const data = snap.val() || {};
+                renderGraph(data);
+            });
+        }
+
+        function renderGraph(data) {
+            const container = document.getElementById('vis-grid');
+            container.innerHTML = '';
+            
+            // Find max value for scaling
+            let max = 0;
+            for(let i=1; i<=10; i++) if((data[i]||0) > max) max = data[i]||0;
+            
+            for(let i=1; i<=10; i++) {
+                const count = data[i] || 0;
+                const height = max > 0 ? (count / max) * 100 : 0;
+                // Color Logic: Red (1-4), Yellow (5-7), Green (8-10)
+                let colorClass = 'bg-red-500';
+                if(i > 4) colorClass = 'bg-yellow-400';
+                if(i > 7) colorClass = 'bg-green-500';
+                if(i === parseInt(currentRating)) colorClass += ' border-2 border-white'; // Highlight user choice
+
+                container.innerHTML += `
+                    <div class="flex-1 flex flex-col justify-end h-full group relative">
+                        <div class="vis-bar w-full rounded-t-sm ${colorClass} opacity-80 group-hover:opacity-100" style="height: ${Math.max(height, 5)}%"></div>
+                        <span class="text-[10px] text-center text-subtle-gray mt-1 font-bold">${i}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function nextRound(g) {
+            dbRef.child(currentPromptId).off(); // Detach listener
+            gameData.currentIndex[gameData.gender]++; // Increment previous gender index
+            setGender(g); // Switch/Set new gender
+        }
+
+        function shareLink() {
+            const txt = document.getElementById('but-prompt').textContent;
+            const url = `${window.location.origin}/TenBut/Share.html?g=${gameData.gender}&t=${encodeURIComponent(txt)}`;
+            if(navigator.share) {
+                navigator.share({ title: 'Rate this flaw', url: url });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert("Link copied to clipboard!");
+            }
+        }
+    </script>
+</body>
+</html>

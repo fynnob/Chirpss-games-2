@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | WAO Survival</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
+        .timer-bar { transition: width 0.1s linear, background-color 0.3s ease; }
+        .prompt-text { font-size: 2.5rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-deep-twilight">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-pink-500/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-rose-500/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-6">
+        
+        <div id="game-state" class="w-full max-w-2xl text-center space-y-8 animate-fade-in-up">
+            <div class="w-full bg-white/5 h-3 rounded-full overflow-hidden border border-white/5">
+                <div id="visual-timer-fill" class="timer-bar h-full bg-pink-500 w-full"></div>
+            </div>
+
+            <div class="bg-card-bg/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
+                <p class="text-[10px] font-bold text-subtle-gray uppercase tracking-[0.2em] mb-2">Active Player</p>
+                <h3 id="current-player" class="text-4xl font-black text-pink-500">---</h3>
+            </div>
+
+            <div id="question-area" class="min-h-[200px] flex items-center justify-center">
+                <p class="prompt-text text-white italic">"Loading..."</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="playerEliminated(false)" class="py-5 bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-900/40 active:scale-95 transition-all">FAILED</button>
+                <button onclick="rotatePlayer()" class="py-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-2xl shadow-lg shadow-pink-500/20 active:scale-95 transition-all">WRONG ANSWER</button>
+            </div>
+        </div>
+
+        <div id="final-results-state" class="hidden text-center max-w-sm w-full bg-card-bg/60 border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-xl">
+            <h2 class="text-sm font-bold text-subtle-gray uppercase tracking-widest mb-2">Champion Survivor</h2>
+            <p id="winner-name" class="text-5xl font-black text-white mb-8"></p>
+            
+            <div class="text-left bg-white/5 p-6 rounded-2xl border border-white/5 mb-8">
+                <p class="text-[10px] font-bold text-subtle-gray uppercase tracking-widest mb-4">The Fallen</p>
+                <ul id="eliminated-players" class="space-y-2 text-rose-500 font-bold text-sm"></ul>
+            </div>
+
+            <button onclick="location.href='./index.html'" class="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-soft-horizon transition-all">PLAY AGAIN</button>
+        </div>
+    </main>
+
+    <script>
+        let gameData = JSON.parse(sessionStorage.getItem('wao_game_data'));
+        let activePlayers = [...gameData.players].sort(() => Math.random() - 0.5);
+        let eliminatedPlayers = [];
+        let prompts = [...gameData.prompts].sort(() => Math.random() - 0.5);
+        let totalTimeLimit = gameData.timePerQuestion * 1000;
+        let timeRemaining;
+        let timerInterval;
+        let currentIndex = 0;
+
+        function rotatePlayer() {
+            clearInterval(timerInterval);
+            if(activePlayers.length <= 1) { endGame(); return; }
+            currentIndex = (currentIndex + 1) % activePlayers.length;
+            const prompt = prompts.pop() || "No more prompts!";
+            document.getElementById('current-player').textContent = activePlayers[currentIndex].toUpperCase();
+            document.getElementById('question-area').querySelector('p').textContent = `"${prompt}"`;
+            document.getElementById('question-area').querySelector('p').classList.remove('text-rose-500');
+            startTimer();
+        }
+
+        function startTimer() {
+            timeRemaining = totalTimeLimit;
+            updateVisual(100);
+            timerInterval = setInterval(() => {
+                timeRemaining -= 100;
+                const pct = (timeRemaining / totalTimeLimit) * 100;
+                updateVisual(pct);
+                if(timeRemaining <= 0) { clearInterval(timerInterval); playerEliminated(true); }
+            }, 100);
+        }
+
+        function updateVisual(pct) {
+            const bar = document.getElementById('visual-timer-fill');
+            const cleanPct = Math.max(0, pct);
+            bar.style.width = cleanPct + "%";
+            bar.style.backgroundColor = cleanPct < 30 ? "#e11d48" : "#ec4899";
+        }
+
+        function playerEliminated(timedOut) {
+            clearInterval(timerInterval);
+            const fallen = activePlayers.splice(currentIndex, 1)[0];
+            eliminatedPlayers.push(fallen);
+            document.getElementById('question-area').querySelector('p').textContent = timedOut ? "TIME'S UP!" : "ELIMINATED";
+            document.getElementById('question-area').querySelector('p').classList.add('text-rose-500');
+            updateVisual(0);
+            if(activePlayers.length <= 1) { setTimeout(endGame, 1500); }
+            else { currentIndex = currentIndex % activePlayers.length; setTimeout(rotatePlayer, 1500); }
+        }
+
+        function endGame() {
+            document.getElementById('game-state').classList.add('hidden');
+            document.getElementById('final-results-state').classList.remove('hidden');
+            document.getElementById('winner-name').textContent = activePlayers[0] || "NONE";
+            document.getElementById('eliminated-players').innerHTML = eliminatedPlayers.reverse().map(p => `<li>${p}</li>`).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { 
+            if(!gameData) location.href = './index.html';
+            rotatePlayer(); 
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Reveal Role</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; }
+        .card-stack { position: relative; width: 320px; height: 420px; margin: 0 auto; user-select: none; }
+        .role-card { position: absolute; inset: 0; border-radius: 2.5rem; display: flex; flex-direction: column; text-align: center; padding: 2.5rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #card-front { background: linear-gradient(135deg, #F97316, #F59E0B); color: white; z-index: 10; cursor: grab; box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3); justify-content: center; }
+        #card-back { background: #1e293b; border: 2px solid rgba(255,255,255,0.1); z-index: 5; justify-content: flex-end; padding-bottom: 3.5rem; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-deep-twilight">
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
+        <div class="text-center mb-10"><h2 class="text-3xl font-extrabold mb-2" id="main-title">Assignment</h2><p class="text-subtle-gray text-sm">Drag up to see role</p></div>
+
+        <div class="card-stack mb-10">
+            <div id="card-back" class="role-card"></div>
+            <div id="card-front" class="role-card">
+                <p class="text-xs font-bold opacity-80 uppercase tracking-tighter mb-2">Next up</p>
+                <h3 id="display-name" class="text-5xl font-black mb-4">PLAYER</h3>
+                <p class="text-[10px] font-bold uppercase tracking-widest animate-bounce mt-4">Pull up</p>
+            </div>
+        </div>
+
+        <button onclick="nextPlayer()" id="next-player-btn" class="w-full max-w-xs py-4 bg-white/5 border border-white/10 text-white/40 font-bold rounded-2xl opacity-50 cursor-not-allowed">NEXT PLAYER (0/0)</button>
+    </main>
+
+    <script>
+        let gameData = JSON.parse(sessionStorage.getItem('chirpss_imposter_game_data'));
+        let assignedRoles = {}; let playersQueue = gameData.players; let currentIndex = 0;
+        let isDragging = false; let startY = 0; let currentY = 0;
+
+        function assignRoles() {
+            const cat = gameData.categories[Math.floor(Math.random() * gameData.categories.length)];
+            const wordObj = cat.words[Math.floor(Math.random() * cat.words.length)];
+            
+            // HISTORY-AWARE SHUFFLE
+            let history = JSON.parse(localStorage.getItem('chirpss_imposter_history') || '[]');
+            let candidates = [...playersQueue].sort(() => Math.random() - 0.5);
+            
+            // If someone was imposter twice in a row, push them to the end of candidates
+            if(history.length >= 2 && history[0] === history[1]) {
+                const repeated = history[0];
+                candidates = candidates.filter(p => p !== repeated).concat(candidates.filter(p => p === repeated));
+            }
+
+            const imposterNames = candidates.slice(0, parseInt(gameData.imposterCount));
+            
+            // Update history
+            history.unshift(imposterNames[0]);
+            localStorage.setItem('chirpss_imposter_history', JSON.stringify(history.slice(0, 5)));
+
+            playersQueue.forEach(p => {
+                const isImp = imposterNames.includes(p);
+                assignedRoles[p] = { isImp, word: wordObj.w.toUpperCase(), hint: gameData.hintEnabled ? wordObj.h : 'Stay hidden.', catName: cat.name };
+            });
+            sessionStorage.setItem('chirpss_imposter_assigned_roles', JSON.stringify(assignedRoles));
+        }
+
+        function renderCard(name) {
+            const role = assignedRoles[name];
+            document.getElementById('display-name').textContent = name.toUpperCase();
+            document.getElementById('card-back').innerHTML = role.isImp 
+                ? `<h4 class="text-red-500 text-4xl font-black mb-1">IMPOSTER</h4><p class="text-sm font-bold text-subtle-gray">HINT: ${role.hint}</p>`
+                : `<h4 class="text-green-500 text-4xl font-black mb-1">CREW</h4><p class="text-sm font-bold text-subtle-gray underline">WORD: ${role.word}</p><p class="text-[10px] mt-4 opacity-30 font-bold uppercase tracking-widest">${role.catName}</p>`;
+            
+            const btn = document.getElementById('next-player-btn');
+            btn.disabled = true;
+            btn.className = "w-full max-w-xs py-4 bg-white/5 border border-white/10 text-white/40 font-bold rounded-2xl opacity-50 cursor-not-allowed transition-all";
+            btn.textContent = `NEXT PLAYER (${currentIndex + 1}/${playersQueue.length})`;
+        }
+
+        function dragStart(e) { isDragging = true; startY = e.touches ? e.touches[0].clientY : e.clientY; document.getElementById('card-front').style.transition = 'none'; }
+        function dragMove(e) {
+            if(!isDragging) return;
+            const y = e.touches ? e.touches[0].clientY : e.clientY;
+            currentY = Math.min(0, Math.max(-280, y - startY));
+            document.getElementById('card-front').style.transform = `translateY(${currentY}px)`;
+        }
+        function dragEnd() {
+            if(!isDragging) return; isDragging = false;
+            const front = document.getElementById('card-front');
+            front.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            front.style.transform = 'translateY(0)';
+            if(currentY < -100) {
+                const btn = document.getElementById('next-player-btn');
+                btn.disabled = false;
+                btn.className = "w-full max-w-xs py-4 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-black rounded-2xl shadow-lg scale-105 transition-all";
+                btn.textContent = currentIndex >= playersQueue.length - 1 ? "START DISCUSSION" : `CONFIRM ROLE ✓`;
+            }
+        }
+
+        function nextPlayer() {
+            if(currentIndex >= playersQueue.length - 1) { window.location.href = './Game.html'; return; }
+            currentIndex++; renderCard(playersQueue[currentIndex]);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            assignRoles(); renderCard(playersQueue[0]);
+            const front = document.getElementById('card-front');
+            front.addEventListener('mousedown', dragStart); window.addEventListener('mousemove', dragMove); window.addEventListener('mouseup', dragEnd);
+            front.addEventListener('touchstart', dragStart); window.addEventListener('touchmove', dragMove); window.addEventListener('touchend', dragEnd);
+        });
+    </script>
+</body>
+</html>

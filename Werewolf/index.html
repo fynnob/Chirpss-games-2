@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Werewolf - Coming Soon</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://chirpss.github.io/icon_2.png">
+
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+    <script src="https://cdn.fynn.qzz.io/cookies.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; }
+        
+        /* Mask for the Werewolf Icon */
+        .werewolf-mask {
+            mask-image: url('https://cdn.fynn.qzz.io/Werewolf/werewolf.svg');
+            -webkit-mask-image: url('https://cdn.fynn.qzz.io/Werewolf/werewolf.svg');
+            mask-size: contain;
+            -webkit-mask-size: contain;
+            mask-repeat: no-repeat;
+            -webkit-mask-repeat: no-repeat;
+            mask-position: center;
+            -webkit-mask-position: center;
+        }
+
+        /* Floating Animation for Hero */
+        .animate-float-slow { animation: float 8s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Blood Pulse Background */
+        @keyframes heartbeat {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; filter: blur(40px); }
+            10% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.15; filter: blur(50px); }
+            20% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; filter: blur(40px); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.05; filter: blur(40px); }
+        }
+        .heartbeat-element {
+            position: absolute; top: 30%; left: 50%;
+            width: 500px; height: 500px;
+            background-color: #ef4444; border-radius: 50%;
+            animation: heartbeat 3s infinite; pointer-events: none; z-index: 0;
+        }
+
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
+        .count-num { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-deep-twilight">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-red-600/10 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-purple-900/10 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+    <div class="heartbeat-element"></div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center pt-20 pb-20 px-4">
+        
+        <div class="text-center max-w-4xl mx-auto space-y-8 animate-float-slow">
+            <div class="flex justify-center mb-6">
+                <div class="h-48 w-48 bg-gradient-to-b from-warm-dusk to-red-600 werewolf-mask drop-shadow-[0_0_35px_rgba(239,68,68,0.4)]"></div>
+            </div>
+
+            <h1 class="text-6xl md:text-8xl font-black tracking-tighter text-white">
+                The Village <br/> <span class="bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-warm-dusk to-fiery-core">Sleeps.</span>
+            </h1>
+
+            <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-red-500/10 border border-red-500/20">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span class="text-red-500 font-bold uppercase tracking-widest text-[10px]">Sharpening the Claws</span>
+            </div>
+
+            <p class="text-lg md:text-xl text-subtle-gray max-w-xl mx-auto leading-relaxed">
+                Brewing potions, assigning roles, and managing chaos. The ultimate social deduction experience is howling at the moon.
+            </p>
+        </div>
+
+        <div class="mt-16 w-full max-w-2xl bg-card-bg/40 border border-white/5 p-8 rounded-[2.5rem] backdrop-blur-xl shadow-2xl text-center">
+            <p class="text-xs font-bold text-subtle-gray uppercase tracking-[0.2em] mb-6">Estimated Awakening</p>
+            
+            <div id="countdown" class="grid grid-cols-4 gap-4">
+                <div class="flex flex-col">
+                    <span id="days" class="text-4xl md:text-6xl font-black text-white count-num">00</span>
+                    <span class="text-[10px] font-bold text-subtle-gray uppercase">Days</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="hours" class="text-4xl md:text-6xl font-black text-white count-num">00</span>
+                    <span class="text-[10px] font-bold text-subtle-gray uppercase">Hours</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="minutes" class="text-4xl md:text-6xl font-black text-white count-num">00</span>
+                    <span class="text-[10px] font-bold text-subtle-gray uppercase">Mins</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="seconds" class="text-4xl md:text-6xl font-black text-red-500 count-num">00</span>
+                    <span class="text-[10px] font-bold text-subtle-gray uppercase">Secs</span>
+                </div>
+            </div>
+
+            <h2 class="mt-8 text-2xl font-black text-warm-dusk italic tracking-tighter">HALLOWEEN 2026</h2>
+        </div>
+
+        <div class="mt-24 max-w-5xl w-full">
+            <h3 class="text-center text-sm font-bold text-subtle-gray uppercase tracking-widest mb-12">What's in the Night?</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="group bg-white/5 border border-white/5 p-8 rounded-3xl hover:bg-white/10 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2">100+ Players</h4>
+                    <p class="text-sm text-subtle-gray leading-relaxed">Massive village support. From small house parties to convention halls, the game scales perfectly without breaking the tension.</p>
+                </div>
+
+                <div class="group bg-white/5 border border-white/5 p-8 rounded-3xl hover:bg-white/10 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-fiery-core/10 flex items-center justify-center text-fiery-core mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2">40+ Exotic Roles</h4>
+                    <p class="text-sm text-subtle-gray leading-relaxed">Way beyond simple Wolves. From the Tanner to the Sorcerer, every game creates a unique web of deception and hidden motives.</p>
+                </div>
+
+                <div class="group bg-white/5 border border-white/5 p-8 rounded-3xl hover:bg-white/10 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-warm-dusk/10 flex items-center justify-center text-warm-dusk mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2">AI Voice Narrator</h4>
+                    <p class="text-sm text-subtle-gray leading-relaxed">No human moderator needed. The app voices the story, wakes up roles, and manages the night cycle for you, so everyone can play.</p>
+                </div>
+
+                <div class="group bg-white/5 border border-white/5 p-8 rounded-3xl hover:bg-white/10 transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 mb-6 group-hover:scale-110 transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-2">Zero-Equipment</h4>
+                    <p class="text-sm text-subtle-gray leading-relaxed">Secret roles are delivered safely to everyone's device. No cards to shuffle, no "closing eyes" to peek. Pure social deduction.</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="window.location.href='https://chirpss.github.io/En/'" class="mt-20 px-10 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold hover:bg-white/10 transition-all">
+            Back to Game Hub
+        </button>
+
+    </main>
+
+    <chirpss-footer></chirpss-footer>
+
+    <script>
+        // Set Target to Halloween 2026
+        const countDownDate = new Date("Oct 31, 2026 00:00:00").getTime();
+
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerHTML = String(days).padStart(2, '0');
+            document.getElementById("hours").innerHTML = String(hours).padStart(2, '0');
+            document.getElementById("minutes").innerHTML = String(minutes).padStart(2, '0');
+            document.getElementById("seconds").innerHTML = String(seconds).padStart(2, '0');
+
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("countdown").innerHTML = "<div class='text-2xl font-bold text-red-500 col-span-4'>THE NIGHT HAS COME</div>";
+            }
+        }, 1000);
+    </script>
+
+</body>
+</html>

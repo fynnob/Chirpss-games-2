@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CHIRPSS | Who Am I?</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://chirpss.github.io/icon_2.png">
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; height: 100dvh; }
+        .card { transition: transform 0.2s ease-out; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
+    </style>
+</head>
+<body class="flex flex-col relative">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-blue-500/10 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <div id="header-controls-template" class="hidden">
+        <div class="flex items-center gap-2">
+            <div id="header-room-display" class="hidden flex-col items-end leading-none border-r border-white/10 pr-3 mr-1">
+                <span class="text-[10px] text-subtle-gray uppercase font-bold">Room</span>
+                <span id="header-code-text" class="text-xl font-mono font-black text-teal-400 tracking-widest">---</span>
+            </div>
+            
+            <button id="header-end-btn" class="hidden px-3 py-1.5 border border-red-500/50 text-red-400 font-bold rounded-lg text-xs hover:bg-red-500/10 transition-colors uppercase">
+                End
+            </button>
+
+            <button id="header-next-btn" class="hidden px-5 py-2 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold rounded-full shadow-lg active:scale-95 transition-all text-sm uppercase flex items-center gap-2">
+                Next
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex-grow flex flex-col items-center justify-center p-4 relative z-10 pt-20">
+        
+        <div id="lobby-overlay" class="absolute inset-0 z-50 bg-deep-twilight flex flex-col items-center justify-center text-center p-6 hidden">
+            <h2 class="text-3xl font-black mb-6 text-white">Join Room</h2>
+            
+            <div id="qr-area" class="bg-white p-2 rounded-xl shadow-2xl mb-6"></div>
+            
+            <div id="lobby-code-text" class="text-6xl font-mono font-black tracking-widest text-teal-400 mb-2">...</div>
+            
+            <p class="text-subtle-gray text-sm mb-8 font-bold uppercase tracking-widest">Scan or enter code</p>
+            <div id="player-count" class="text-lg font-bold text-white mb-8">Players: 0</div>
+            
+            <button onclick="hostStartCountdown()" class="w-full max-w-xs py-4 bg-white text-black font-black text-xl rounded-2xl shadow-xl active:scale-95 transition-all">START GAME</button>
+            <button onclick="cleanupGhosts()" class="mt-4 text-xs text-subtle-gray underline">Kick inactive players</button>
+        </div>
+
+        <div id="waiting-overlay" class="absolute inset-0 z-50 bg-deep-twilight flex flex-col items-center justify-center text-center p-6 hidden">
+            <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+            <h2 class="text-2xl font-bold text-white mb-2">You're In!</h2>
+            <p class="text-subtle-gray">Waiting for host...</p>
+        </div>
+
+        <div id="countdown-overlay" class="absolute inset-0 z-40 bg-blue-600 flex flex-col items-center justify-center text-center p-6 hidden">
+            <h2 class="text-4xl font-black mb-8 text-white">PHONE ON<br>FOREHEAD!</h2>
+            <div id="countdown-display" class="text-9xl font-black text-white/20">5</div>
+        </div>
+
+        <div id="game-card" class="card w-full h-full max-h-[80vh] bg-white text-deep-twilight rounded-[2.5rem] flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 w-full h-2 bg-gradient-to-r from-blue-500 to-teal-400"></div>
+            <h1 id="word-display" class="text-6xl md:text-8xl font-black leading-tight break-words w-full">...</h1>
+            <p class="absolute bottom-8 text-subtle-gray/40 text-sm font-bold uppercase tracking-[0.3em]">Who Am I?</p>
+        </div>
+
+    </div>
+
+    <script>
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdgoyDsUteoRBIQ74NXvg5Xfj8V105Dnw",
+            authDomain: "chirpssgames.firebaseapp.com",
+            databaseURL: "https://chirpssgames-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "chirpssgames",
+            storageBucket: "chirpssgames.firebasestorage.app",
+            messagingSenderId: "949878456642",
+            appId: "1:949878456642:web:4287fe5fe9577ce1b688db"
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode'); 
+        const code = urlParams.get('code');
+        
+        // --- FIX FOR "ONE DEVICE" BUG ---
+        // We now use sessionStorage. This creates a UNIQUE ID for every TAB.
+        // If you open 3 tabs, you are now 3 players.
+        let myId = sessionStorage.getItem('whoami_id');
+        if(!myId) {
+            myId = 'p_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('whoami_id', myId);
+        }
+
+        let db, dbRef, playerRef;
+        let wordsPool = [];
+        let singleIndex = 0;
+        let serverTimeOffset = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Inject Header Controls (Waiting for layout.js to render)
+            injectHeaderLoop();
+
+            // 2. Load Data
+            const data = sessionStorage.getItem('whoami_data');
+            // If data is missing (direct link joiner), we rely on Firebase updates
+            if (data) {
+                wordsPool = JSON.parse(data);
+                wordsPool.sort(() => Math.random() - 0.5);
+            } else if (mode === 'single') {
+                window.location.href = './index.html';
+            }
+
+            if (mode === 'single') initSingle();
+            else initMulti();
+        });
+
+        // --- HEADER INJECTION ---
+        function injectHeaderLoop() {
+            const check = setInterval(() => {
+                // We target the max-w-7xl container inside the header
+                const headerContainer = document.querySelector('chirpss-header header .max-w-7xl');
+                
+                if(headerContainer) {
+                    clearInterval(check);
+                    
+                    // 1. Remove ONLY the Join Button (leaving the Logo intact)
+                    const joinBtn = headerContainer.querySelector('button');
+                    if(joinBtn) joinBtn.remove();
+                    
+                    // 2. Clone our template
+                    const template = document.getElementById('header-controls-template');
+                    const controls = template.firstElementChild.cloneNode(true);
+                    
+                    // 3. Setup Buttons
+                    const endBtn = controls.querySelector('#header-end-btn');
+                    const nextBtn = controls.querySelector('#header-next-btn');
+                    const roomDisplay = controls.querySelector('#header-room-display');
+                    const codeText = controls.querySelector('#header-code-text');
+
+                    endBtn.onclick = hostEndGame;
+                    nextBtn.onclick = handleNextClick;
+                    
+                    // 4. Update Header Room Code immediatly
+                    if(mode !== 'single' && code) {
+                        roomDisplay.classList.remove('hidden');
+                        roomDisplay.classList.add('flex');
+                        codeText.textContent = code;
+                    }
+
+                    // 5. Inject into DOM
+                    headerContainer.appendChild(controls);
+                }
+            }, 100);
+        }
+
+        // --- SINGLE PLAYER ---
+        function initSingle() {
+            showControls(true);
+            runCountdown(5, () => showNextWordSingle());
+        }
+
+        function handleNextClick() {
+            if(mode === 'single') {
+                runCountdown(5, () => showNextWordSingle());
+            } else {
+                hostStartCountdown();
+            }
+        }
+
+        function showNextWordSingle() {
+            if(!wordsPool || wordsPool.length === 0) return;
+            const word = wordsPool[singleIndex % wordsPool.length];
+            singleIndex++;
+            fitText(word);
+        }
+
+        // --- MULTIPLAYER ---
+        function initMulti() {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            dbRef = db.ref('games/' + code);
+            playerRef = dbRef.child('players/' + myId);
+
+            db.ref('.info/serverTimeOffset').on('value', snap => { serverTimeOffset = snap.val(); });
+
+            if (mode === 'host') {
+                document.getElementById('lobby-overlay').classList.remove('hidden');
+                document.getElementById('lobby-code-text').textContent = code;
+                
+                // Show Host End Button
+                setTimeout(() => {
+                   const endBtn = document.querySelector('#header-end-btn');
+                   if(endBtn) endBtn.classList.remove('hidden');
+                }, 1000);
+
+                const joinUrl = `https://chirpss.github.io/En/Join/?code=${code}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(joinUrl)}`;
+                document.getElementById('qr-area').innerHTML = `<img src="${qrUrl}" alt="QR">`;
+
+                dbRef.child('players').on('value', snap => {
+                    document.getElementById('player-count').textContent = `Players: ${snap.numChildren()}`;
+                });
+            } else {
+                document.getElementById('waiting-overlay').classList.remove('hidden');
+            }
+
+            playerRef.set({ id: myId, status: 'joined', lastSeen: firebase.database.ServerValue.TIMESTAMP });
+            playerRef.onDisconnect().remove();
+
+            // Heartbeat
+            setInterval(() => {
+                playerRef.update({ lastSeen: firebase.database.ServerValue.TIMESTAMP });
+            }, 5000);
+
+            // Listen for Game State
+            dbRef.on('value', snap => {
+                const game = snap.val();
+                if (!game) return window.location.href = './index.html';
+
+                if (game.status === 'countdown') {
+                    startSyncedCountdown(game.startTime);
+                } 
+                else if (game.status === 'playing') {
+                    hideOverlays();
+                    const myWord = game.players[myId]?.currentWord;
+                    fitText(myWord || "...");
+                    
+                    if (mode === 'host') showControls(true);
+                }
+            });
+        }
+
+        function hostStartCountdown() {
+            showControls(false); // Hide button to prevent spam
+
+            dbRef.once('value', snap => {
+                const game = snap.val();
+                let globalIndex = game.nextWordIndex || 0;
+                let pool = game.wordsPool || wordsPool; 
+
+                const updates = {};
+                
+                // --- SHARED DECK LOGIC ---
+                // Assign unique words based on global index
+                if(game.players) {
+                    Object.keys(game.players).forEach(pid => {
+                        updates[`players/${pid}/currentWord`] = pool[globalIndex % pool.length];
+                        globalIndex++;
+                    });
+                }
+
+                updates['wordsPool'] = pool; 
+                updates['nextWordIndex'] = globalIndex;
+                updates['status'] = 'countdown';
+                updates['startTime'] = getServerTime() + 5000;
+
+                dbRef.update(updates);
+            });
+        }
+
+        function startSyncedCountdown(targetTime) {
+            hideOverlays();
+            
+            runCountdown(5, () => {
+                if (mode === 'host') dbRef.update({ status: 'playing' });
+            });
+        }
+
+        // --- UTILS ---
+        function hideOverlays() {
+            document.getElementById('lobby-overlay').classList.add('hidden');
+            document.getElementById('waiting-overlay').classList.add('hidden');
+        }
+
+        function showControls(show) {
+            const btn = document.querySelector('#header-next-btn');
+            if(btn) {
+                if(show) { btn.classList.remove('hidden'); btn.classList.add('flex'); }
+                else { btn.classList.remove('flex'); btn.classList.add('hidden'); }
+            }
+        }
+
+        function runCountdown(seconds, callback) {
+            const overlay = document.getElementById('countdown-overlay');
+            const display = document.getElementById('countdown-display');
+            overlay.classList.remove('hidden');
+            
+            let remaining = seconds;
+            display.textContent = remaining;
+
+            const interval = setInterval(() => {
+                remaining--;
+                if(remaining > 0) {
+                    display.textContent = remaining;
+                } else {
+                    clearInterval(interval);
+                    overlay.classList.add('hidden'); 
+                    callback();
+                }
+            }, 1000);
+        }
+
+        function hostEndGame() {
+            if(confirm("End game?")) { dbRef.remove(); window.location.href = './index.html'; }
+        }
+
+        function cleanupGhosts() {
+            const now = getServerTime();
+            dbRef.child('players').once('value', snap => {
+                snap.forEach(child => {
+                    if (now - child.val().lastSeen > 30000) child.ref.remove();
+                });
+            });
+        }
+
+        function getServerTime() { return Date.now() + serverTimeOffset; }
+
+        function fitText(word) {
+            const el = document.getElementById('word-display');
+            el.textContent = word;
+            if(word.length > 12) el.style.fontSize = "3rem";
+            else if(word.length > 8) el.style.fontSize = "5rem";
+            else el.style.fontSize = "6rem";
+        }
+    </script>
+</body>
+</html>
