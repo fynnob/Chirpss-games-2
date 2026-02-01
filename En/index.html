@@ -20,7 +20,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; }
         .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
         .reveal.active { opacity: 1; transform: translateY(0); }
-        .game-card-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .game-card-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: block; }
         .game-card-link:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: transform 0.1s linear; z-index: 0; }
     </style>
@@ -54,8 +54,8 @@
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-20">
             
-            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('Imposter')">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+            <a href="https://gc.fynn.qzz.io/En/Imposter/" class="relative game-card-link reveal active">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group h-full">
                     <div class="h-1 bg-gradient-to-r from-warm-dusk to-fiery-core"></div>
                     <div class="p-5 flex flex-col flex-grow text-white">
                         <div class="flex-grow">
@@ -63,14 +63,14 @@
                             <p class="text-xs font-medium text-subtle-gray">Debate and vote to unmask the spy.</p>
                         </div>
                         <div class="mt-4">
-                            <button class="w-full py-1.5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                            <span class="block w-full py-1.5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110 text-center">Launch</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
-            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('WhoAmI')" style="animation-delay: 100ms;">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+            <a href="https://gc.fynn.qzz.io/En/WhoAmI/" class="relative game-card-link reveal active" style="animation-delay: 100ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group h-full">
                     <div class="h-1 bg-gradient-to-r from-blue-500 to-teal-400"></div>
                     <div class="p-5 flex flex-col flex-grow text-white">
                         <div class="flex-grow">
@@ -78,14 +78,14 @@
                             <p class="text-xs font-medium text-subtle-gray">Guess the secret person or object.</p>
                         </div>
                         <div class="mt-4">
-                            <button class="w-full py-1.5 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                            <span class="block w-full py-1.5 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110 text-center">Launch</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
-            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('WrongAnswersOnly')" style="animation-delay: 200ms;">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+            <a href="https://gc.fynn.qzz.io/En/WrongAnswersOnly/" class="relative game-card-link reveal active" style="animation-delay: 200ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group h-full">
                     <div class="h-1 bg-gradient-to-r from-pink-500 to-rose-500"></div>
                     <div class="p-5 flex flex-col flex-grow text-white">
                         <div class="flex-grow">
@@ -93,14 +93,14 @@
                             <p class="text-xs font-medium text-subtle-gray">Answer the question wrong to win.</p>
                         </div>
                         <div class="mt-4">
-                            <button class="w-full py-1.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                            <span class="block w-full py-1.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110 text-center">Launch</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
-            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('TenBut')" style="animation-delay: 300ms;">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+            <a href="https://gc.fynn.qzz.io/En/TenBut/" class="relative game-card-link reveal active" style="animation-delay: 300ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group h-full">
                     <div class="h-1 bg-gradient-to-r from-yellow-500 to-green-500"></div>
                     <div class="p-5 flex flex-col flex-grow text-white">
                         <div class="flex-grow">
@@ -108,14 +108,14 @@
                             <p class="text-xs font-medium text-subtle-gray">Rate a 10/10 with a spicy twist.</p>
                         </div>
                         <div class="mt-4">
-                            <button class="w-full py-1.5 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                            <span class="block w-full py-1.5 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110 text-center">Launch</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
-            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('MoreOrLess')" style="animation-delay: 400ms;">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+            <a href="https://gc.fynn.qzz.io/En/MoreOrLess/" class="relative game-card-link reveal active" style="animation-delay: 400ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group h-full">
                     <div class="h-1 bg-gradient-to-r from-warm-dusk to-fiery-core"></div>
                     <div class="p-5 flex flex-col flex-grow text-white">
                         <div class="flex-grow">
@@ -123,14 +123,14 @@
                             <p class="text-xs font-medium text-subtle-gray">Guess if crazy facts are higher or lower!</p>
                         </div>
                         <div class="mt-4">
-                            <button class="w-full py-1.5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                            <span class="block w-full py-1.5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110 text-center">Launch</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
             
-            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('ShortFuse')" style="animation-delay: 400ms;">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+            <a href="https://gc.fynn.qzz.io/En/ShortFuse/" class="relative game-card-link reveal active" style="animation-delay: 400ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group h-full">
                     <div class="h-1 bg-gradient-to-r from-red-600 to-orange-600"></div>
                     <div class="p-5 flex flex-col flex-grow text-white">
                         <div class="flex-grow">
@@ -138,20 +138,20 @@
                             <p class="text-xs font-medium text-subtle-gray">Pass the bomb before time runs out.</p>
                         </div>
                         <div class="mt-4">
-                            <button class="w-full py-1.5 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                            <span class="block w-full py-1.5 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110 text-center">Launch</span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
-            <div class="relative game-card-link cursor-default reveal active" onclick="startPlay('WerewolfEarlyAccess')" style="animation-delay: 500ms;">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-deep-twilight/50 border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-6 text-center hover:border-white/30 transition-colors">
+            <a href="https://gc.fynn.qzz.io/En/Werewolf/" class="relative game-card-link reveal active" style="animation-delay: 500ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-deep-twilight/50 border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-6 text-center hover:border-white/30 transition-colors h-full">
                     <span class="text-4xl mb-4 grayscale opacity-50">🐺</span>
                     <h3 class="text-sm font-bold text-white">Werewolf</h3>
                     <p class="text-[10px] text-subtle-gray mt-2">Coming soon</p>
-                    <button class="mt-4 px-3 py-1.5 bg-white/10 text-white font-bold text-[10px] rounded-lg hover:bg-white/20">Get early access</button>
+                    <span class="mt-4 px-3 py-1.5 bg-white/10 text-white font-bold text-[10px] rounded-lg hover:bg-white/20">Get early access</span>
                 </div>
-            </div>
+            </a>
 
         </div>
 
@@ -173,19 +173,5 @@
 
     <chirpss-footer></chirpss-footer>
 
-    <script>
-        window.startPlay = function(gameName) {
-           const pathMap = { 
-               'Imposter': 'https://gc.fynn.qzz.io/En/Imposter/', 
-               'WrongAnswersOnly': 'https://gc.fynn.qzz.io/En/WrongAnswersOnly/', 
-               'TenBut': 'https://gc.fynn.qzz.io/En/TenBut/', 
-               'WhoAmI': 'https://gc.fynn.qzz.io/En/WhoAmI/', 
-               'MoreOrLess': 'https://gc.fynn.qzz.io/En/MoreOrLess/', 
-               'ShortFuse': 'https://gc.fynn.qzz.io/En/ShortFuse/',
-               'WerewolfEarlyAccess': 'https://gc.fynn.qzz.io/En/Werewolf/'
-           };&& 
-           window.location.href = pathMap[gameName] || 'https://gc.fynn.qzz.io/En/';
-        };
-    </script>
 </body>
 </html>
