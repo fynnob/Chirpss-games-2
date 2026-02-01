@@ -3,30 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Join Game</title>
+    <title>CHIRPSS | The Party Game Hub</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
+    <meta name="description" content="Play free online party games instantly. No ads, no downloads.">
+    <meta property="og:title" content="CHIRPSS: Instant Party Games" />
+    <meta property="og:image" content="https://gc.fynn.qzz.io/icon.png" /> 
+    
     <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
     <script src="https://cdn.fynn.qzz.io/cookies.js" defer></script> 
 
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; }
-        
-        .pin-input {
-            letter-spacing: 0.5em;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-weight: 800;
-            padding-left: 0.5em; 
-            text-align: center;
-            text-transform: uppercase;
-        }
-
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; }
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .game-card-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .game-card-link:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
         .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: transform 0.1s linear; z-index: 0; }
     </style>
 </head>
@@ -34,130 +29,163 @@
 
     <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div id="blob-1" class="blob-bg bg-warm-dusk/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
-        <div id="blob-2" class="blob-bg bg-purple-500/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-purple-500/20 w-80 h-80 top-40 right-1/4 animate-drift" style="animation-delay: -5s;"></div>
+        <div id="blob-3" class="blob-bg bg-fiery-core/10 w-96 h-96 -bottom-32 left-1/3 animate-drift" style="animation-delay: -10s;"></div>
     </div>
 
     <chirpss-header></chirpss-header>
 
-    <main class="relative z-10 flex-grow flex items-center justify-center p-6">
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-grow">
         
-        <div class="w-full max-w-md bg-card-bg/60 border border-white/10 p-8 sm:p-10 rounded-3xl shadow-2xl backdrop-blur-xl animate-fade-in-up">
+        <div class="text-center py-20 sm:py-28 animate-fade-in-up">
+            <span class="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-warm-dusk text-xs font-bold tracking-wider mb-6">
+                NO ACCOUNTS • NO DOWNLOADS
+            </span>
+            <h1 class="text-5xl sm:text-7xl font-extrabold tracking-tight mb-6">
+                Your party, <br/>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-warm-dusk via-fiery-core to-purple-500">
+                    leveled up.
+                </span>
+            </h1>
+            <p class="text-lg sm:text-xl text-subtle-gray max-w-2xl mx-auto leading-relaxed">
+                The ultimate hub for social deduction and group party games. 
+            </p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-20">
             
-            <div class="text-center mb-10">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-warm-dusk to-fiery-core mb-6 shadow-lg shadow-orange-500/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                    </svg>
+            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('Imposter')">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+                    <div class="h-1 bg-gradient-to-r from-warm-dusk to-fiery-core"></div>
+                    <div class="p-5 flex flex-col flex-grow text-white">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-extrabold mb-2 tracking-tight">Imposter</h3>
+                            <p class="text-xs font-medium text-subtle-gray">Debate and vote to unmask the spy.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="w-full py-1.5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                        </div>
+                    </div>
                 </div>
-                <h1 class="text-3xl font-extrabold text-white mb-2">Join Game</h1>
-                <p class="text-subtle-gray text-sm font-medium">Enter your 4-digit room code to play</p>
             </div>
 
-            <div class="space-y-6">
-                <div class="relative">
-                    <input type="text" id="game-code" maxlength="4" placeholder="ABCD" 
-                           class="pin-input w-full bg-white/5 border border-white/10 rounded-2xl py-5 text-4xl text-fiery-core placeholder-white/5 focus:border-fiery-core focus:outline-none transition-all shadow-inner">
+            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('WhoAmI')" style="animation-delay: 100ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+                    <div class="h-1 bg-gradient-to-r from-blue-500 to-teal-400"></div>
+                    <div class="p-5 flex flex-col flex-grow text-white">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-extrabold mb-2 tracking-tight">Who Am I</h3>
+                            <p class="text-xs font-medium text-subtle-gray">Guess the secret person or object.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="w-full py-1.5 bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                        </div>
+                    </div>
                 </div>
-                
-                <button onclick="joinGame()" id="join-btn" class="w-full py-5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-black text-xl rounded-2xl shadow-lg shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                    Join Room
-                </button>
-                
-                <div id="error-container" class="min-h-[24px] text-center">
-                    <p id="error-msg" class="text-red-500 text-sm font-bold hidden"></p>
+            </div>
+
+            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('WrongAnswersOnly')" style="animation-delay: 200ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+                    <div class="h-1 bg-gradient-to-r from-pink-500 to-rose-500"></div>
+                    <div class="p-5 flex flex-col flex-grow text-white">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-extrabold mb-2 tracking-tight">Wrong Answers</h3>
+                            <p class="text-xs font-medium text-subtle-gray">Answer the question wrong to win.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="w-full py-1.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('TenBut')" style="animation-delay: 300ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+                    <div class="h-1 bg-gradient-to-r from-yellow-500 to-green-500"></div>
+                    <div class="p-5 flex flex-col flex-grow text-white">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-extrabold mb-2 tracking-tight">10/10 But</h3>
+                            <p class="text-xs font-medium text-subtle-gray">Rate a 10/10 with a spicy twist.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="w-full py-1.5 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('MoreOrLess')" style="animation-delay: 400ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+                    <div class="h-1 bg-gradient-to-r from-warm-dusk to-fiery-core"></div>
+                    <div class="p-5 flex flex-col flex-grow text-white">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-extrabold mb-2 tracking-tight">More Or Less</h3>
+                            <p class="text-xs font-medium text-subtle-gray">Guess if crazy facts are higher or lower!</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="w-full py-1.5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('ShortFuse')" style="animation-delay: 400ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+                    <div class="h-1 bg-gradient-to-r from-red-600 to-orange-600"></div>
+                    <div class="p-5 flex flex-col flex-grow text-white">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-extrabold mb-2 tracking-tight">Short Fuse</h3>
+                            <p class="text-xs font-medium text-subtle-gray">Pass the bomb before time runs out.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="w-full py-1.5 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative game-card-link cursor-default reveal active" onclick="startPlay('WerewolfEarlyAccess')" style="animation-delay: 500ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-deep-twilight/50 border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-6 text-center hover:border-white/30 transition-colors">
+                    <span class="text-4xl mb-4 grayscale opacity-50">🐺</span>
+                    <h3 class="text-sm font-bold text-white">Werewolf</h3>
+                    <p class="text-[10px] text-subtle-gray mt-2">Coming soon</p>
+                    <button class="mt-4 px-3 py-1.5 bg-white/10 text-white font-bold text-[10px] rounded-lg hover:bg-white/20">Get early access</button>
                 </div>
             </div>
 
         </div>
+
+        <section class="mt-10 border-t border-white/10 pt-10 pb-10">
+            <div class="prose prose-invert prose-sm max-w-none text-subtle-gray">
+                <h2 class="text-xl font-bold text-white mb-4">Why Play on CHIRPSS?</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <p><strong>Free Browser Party Games:</strong> CHIRPSS is your home for instant social deduction games. We require zero downloads and zero account sign-ups.</p>
+                    </div>
+                    <div>
+                        <p><strong>Data-Driven Fun:</strong> We don't guess what's fun—we measure it. We analyze gameplay stats to see exactly which questions and mechanics you love. CHIRPSS evolves based on your data.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </main>
 
     <chirpss-footer></chirpss-footer>
 
     <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdgoyDsUteoRBIQ74NXvg5Xfj8V105Dnw",
-            authDomain: "chirpssgames.firebaseapp.com",
-            databaseURL: "https://chirpssgames-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "chirpssgames",
-            storageBucket: "chirpssgames.firebasestorage.app",
-            messagingSenderId: "949878456642",
-            appId: "1:949878456642:web:4287fe5fe9577ce1b688db",
-            measurementId: "G-E628QMNRQY"
+        window.startPlay = function(gameName) {
+           const pathMap = { 
+               'Imposter': 'https://gc.fynn.qzz.io/En/Imposter/', 
+               'WrongAnswersOnly': 'https://gc.fynn.qzz.io/En/WrongAnswersOnly/', 
+               'TenBut': 'https://gc.fynn.qzz.io/En/TenBut/', 
+               'WhoAmI': 'https://gc.fynn.qzz.io/En/WhoAmI/', 
+               'MoreOrLess': 'https://gc.fynn.qzz.io/En/MoreOrLess/', 
+               'ShortFuse': 'https://gc.fynn.qzz.io/En/ShortFuse/',
+               'WerewolfEarlyAccess': 'https://gc.fynn.qzz.io/En/Werewolf/'
+           };&& 
+           window.location.href = pathMap[gameName] || 'https://gc.fynn.qzz.io/En/';
         };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // Check for URL Parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlCode = urlParams.get('code');
-        
-        if (urlCode) {
-            document.getElementById('game-code').value = urlCode;
-            joinGame();
-        }
-
-        async function joinGame() {
-            const codeInput = document.getElementById('game-code');
-            const code = codeInput.value.toUpperCase(); 
-            const errorMsg = document.getElementById('error-msg');
-            const btn = document.getElementById('join-btn');
-
-            if (code.length < 4) {
-                showError("Please enter a 4-digit code");
-                return;
-            }
-
-            // UI State Change
-            btn.innerHTML = `<span class="inline-block animate-pulse">Searching...</span>`;
-            btn.disabled = true;
-            errorMsg.classList.add('hidden');
-
-            try {
-                const snapshot = await db.ref('games/' + code).once('value');
-                if (snapshot.exists()) {
-                    const gameData = snapshot.val();
-                    const gameType = gameData.gameType || 'whoami';
-
-                    // Route based on game type
-                    const routes = {
-                        'whoami': '/WhoAmI/Game.html',
-                        'tenbut': '/TenBut/Game.html'
-                    };
-                    
-                    const target = routes[gameType.toLowerCase()] || '/WhoAmI/Game.html';
-                    window.location.href = `${target}?mode=joiner&code=${code}`;
-                    
-                } else {
-                    throw new Error("Room not found");
-                }
-            } catch (e) {
-                console.error(e);
-                showError(e.message === "Room not found" ? "This room doesn't exist" : "Connection error");
-                
-                // Reset Button
-                btn.textContent = "Join Room";
-                btn.disabled = false;
-            }
-        }
-
-        function showError(msg) {
-            const errorMsg = document.getElementById('error-msg');
-            errorMsg.textContent = msg;
-            errorMsg.classList.remove('hidden');
-        }
-        
-        // Auto-Uppercase input
-        document.getElementById('game-code').addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
-        });
-        
-        // Enter Key Support
-        document.getElementById('game-code').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') joinGame();
-        });
     </script>
 </body>
 </html>
