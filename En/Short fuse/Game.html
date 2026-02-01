@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Short Fuse</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script>
+    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #F1F5F9; overflow: hidden; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
+        .timer-bar { transition: width 0.1s linear, background-color 0.3s ease; }
+        .prompt-text { font-size: 2.5rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+        
+        @keyframes pulse-red {
+            0%, 100% { background-color: rgba(239, 68, 68, 0.0); }
+            50% { background-color: rgba(239, 68, 68, 0.3); }
+        }
+        .danger-mode { animation: pulse-red 0.5s infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-slate-950" id="body-el">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-red-600/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-orange-600/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-6">
+        
+        <div id="prep-overlay" class="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col items-center justify-center text-center p-6 hidden">
+            <h3 class="text-orange-500 font-bold uppercase tracking-widest mb-4 text-sm">Next Category</h3>
+            <h2 id="prep-category" class="text-4xl sm:text-5xl font-black text-white mb-12 leading-tight">...</h2>
+            
+            <div class="text-6xl font-black text-red-500 font-mono mb-2" id="prep-timer">10</div>
+            <p class="text-slate-500 text-xs uppercase font-bold tracking-widest">Get Ready to Answer</p>
+        </div>
+
+        <div id="game-state" class="w-full max-w-2xl text-center space-y-8 animate-fade-in-up hidden">
+            
+            <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden border border-slate-700">
+                <div id="visual-timer-fill" class="timer-bar h-full bg-red-500 w-full"></div>
+            </div>
+
+            <div class="bg-slate-900/80 border border-red-500/20 p-8 rounded-[2rem] backdrop-blur-xl shadow-2xl">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Active Player</p>
+                <h3 id="current-player" class="text-4xl font-black text-white mb-8">---</h3>
+                
+                <div id="question-area" class="min-h-[120px] flex items-center justify-center border-t border-white/5 pt-6">
+                    <p class="prompt-text text-red-500 italic uppercase">Loading...</p>
+                </div>
+            </div>
+
+            <button onclick="passBomb()" id="action-btn" class="w-full py-6 bg-gradient-to-r from-red-600 to-orange-600 text-white font-black text-3xl italic uppercase tracking-wider rounded-2xl shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all border border-red-400">
+                PASS BOMB
+            </button>
+        </div>
+
+        <div id="final-results-state" class="hidden text-center max-w-sm w-full bg-slate-900/90 border border-red-500/20 p-10 rounded-[2.5rem] backdrop-blur-xl">
+            <h2 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Survivor</h2>
+            <p id="winner-name" class="text-5xl font-black text-white mb-8"></p>
+            
+            <div class="text-left bg-black/20 p-6 rounded-2xl border border-white/5 mb-8">
+                <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-4">Exploded</p>
+                <ul id="eliminated-players" class="space-y-2 text-slate-400 font-bold text-sm"></ul>
+            </div>
+
+            <button onclick="location.href='./index.html'" class="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-slate-200 transition-all">PLAY AGAIN</button>
+        </div>
+    </main>
+
+    <script>
+        let gameData = JSON.parse(sessionStorage.getItem('shortfuse_game_data'));
+        let activePlayers = [...gameData.players].sort(() => Math.random() - 0.5);
+        let eliminatedPlayers = [];
+        let prompts = [...gameData.prompts].sort(() => Math.random() - 0.5);
+        let totalTimeLimit = gameData.timePerQuestion * 1000;
+        
+        let timeRemaining;
+        let timerInterval;
+        let prepInterval;
+        let currentIndex = 0;
+        let currentPrompt = "";
+
+        // Start the game logic
+        document.addEventListener('DOMContentLoaded', () => { 
+            if(!gameData) location.href = './index.html';
+            startNewRound(); 
+        });
+
+        // Called when game starts OR after an elimination (Survivors need a new topic)
+        function startNewRound() {
+            if(activePlayers.length <= 1) { endGame(); return; }
+            
+            // 1. Pick new category
+            currentPrompt = prompts.pop() || "No more categories!";
+            
+            // 2. Show Prep Overlay (10s)
+            showPrep(currentPrompt);
+        }
+
+        function showPrep(category) {
+            const overlay = document.getElementById('prep-overlay');
+            const gameUi = document.getElementById('game-state');
+            const timerEl = document.getElementById('prep-timer');
+            const catEl = document.getElementById('prep-category');
+
+            overlay.classList.remove('hidden');
+            gameUi.classList.add('hidden');
+            document.getElementById('body-el').classList.remove('danger-mode');
+            
+            catEl.textContent = category;
+            
+            let prepTime = 10;
+            timerEl.textContent = prepTime;
+
+            clearInterval(prepInterval);
+            prepInterval = setInterval(() => {
+                prepTime--;
+                timerEl.textContent = prepTime;
+                if(prepTime <= 0) {
+                    clearInterval(prepInterval);
+                    overlay.classList.add('hidden');
+                    gameUi.classList.remove('hidden');
+                    // Start the first turn of the round
+                    updateGameUI();
+                    startTimer();
+                }
+            }, 1000);
+        }
+
+        function updateGameUI() {
+            // Update Text
+            document.getElementById('current-player').textContent = activePlayers[currentIndex].toUpperCase();
+            document.getElementById('question-area').querySelector('p').textContent = currentPrompt;
+            document.getElementById('question-area').querySelector('p').classList.remove('text-slate-500'); // Reset color if it was "Exploded"
+            document.getElementById('question-area').querySelector('p').classList.add('text-white');
+            
+            // Reset Button
+            const btn = document.getElementById('action-btn');
+            btn.disabled = false;
+            btn.textContent = "PASS BOMB";
+            btn.className = "w-full py-6 bg-gradient-to-r from-red-600 to-orange-600 text-white font-black text-3xl italic uppercase tracking-wider rounded-2xl shadow-[0_0_30px_rgba(220,38,38,0.4)] active:scale-95 transition-all border border-red-400";
+        }
+
+        function passBomb() {
+            clearInterval(timerInterval);
+            
+            // Move to next player
+            currentIndex = (currentIndex + 1) % activePlayers.length;
+            
+            updateGameUI();
+            startTimer();
+        }
+
+        function startTimer() {
+            timeRemaining = totalTimeLimit;
+            updateVisual(100);
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeRemaining -= 100;
+                const pct = (timeRemaining / totalTimeLimit) * 100;
+                updateVisual(pct);
+                
+                // Visual Danger
+                if(pct < 30) document.getElementById('body-el').classList.add('danger-mode');
+                else document.getElementById('body-el').classList.remove('danger-mode');
+
+                if(timeRemaining <= 0) { 
+                    clearInterval(timerInterval); 
+                    playerExploded(); 
+                }
+            }, 100);
+        }
+
+        function updateVisual(pct) {
+            const bar = document.getElementById('visual-timer-fill');
+            const cleanPct = Math.max(0, pct);
+            bar.style.width = cleanPct + "%";
+            // Color shift from Orange -> Red
+            bar.style.backgroundColor = cleanPct < 30 ? "#ef4444" : "#f97316";
+        }
+
+        function playerExploded() {
+            document.getElementById('body-el').classList.remove('danger-mode');
+            
+            // Change UI to Failed State
+            const btn = document.getElementById('action-btn');
+            btn.disabled = true;
+            btn.textContent = "EXPLODED!";
+            btn.className = "w-full py-6 bg-slate-800 text-slate-500 font-black text-3xl italic uppercase tracking-wider rounded-2xl cursor-not-allowed border border-slate-700";
+
+            document.getElementById('question-area').querySelector('p').textContent = "BOOM!";
+            document.getElementById('question-area').querySelector('p').classList.remove('text-white');
+            document.getElementById('question-area').querySelector('p').classList.add('text-red-600');
+
+            // Remove Player logic
+            const fallen = activePlayers.splice(currentIndex, 1)[0];
+            eliminatedPlayers.push(fallen);
+
+            // Wait 2 seconds then start next round (or end game)
+            setTimeout(() => {
+                if(activePlayers.length <= 1) { 
+                    endGame(); 
+                } else { 
+                    // Reset index to ensure it's valid
+                    currentIndex = currentIndex % activePlayers.length;
+                    startNewRound(); // Pick new category + Prep
+                }
+            }, 2500);
+        }
+
+        function endGame() {
+            document.getElementById('game-state').classList.add('hidden');
+            document.getElementById('final-results-state').classList.remove('hidden');
+            document.getElementById('winner-name').textContent = activePlayers[0] || "NOBODY";
+            document.getElementById('eliminated-players').innerHTML = eliminatedPlayers.reverse().map(p => `<li>${p}</li>`).join('');
+        }
+    </script>
+</body>
+</html>
