@@ -128,6 +128,21 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="relative game-card-link cursor-pointer reveal active" onclick="startPlay('ShortFuse')" style="animation-delay: 400ms;">
+                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-card-bg border border-white/5 flex flex-col group">
+                    <div class="h-1 bg-gradient-to-r from-red-600 to-orange-600"></div>
+                    <div class="p-5 flex flex-col flex-grow text-white">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-extrabold mb-2 tracking-tight">Short Fuse</h3>
+                            <p class="text-xs font-medium text-subtle-gray">Pass the bomb before time runs out.</p>
+                        </div>
+                        <div class="mt-4">
+                            <button class="w-full py-1.5 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs rounded-lg shadow-lg hover:brightness-110">Launch</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="relative game-card-link cursor-default reveal active" onclick="startPlay('WerewolfEarlyAccess')" style="animation-delay: 500ms;">
                 <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-xl bg-deep-twilight/50 border-2 border-dashed border-white/10 flex flex-col items-center justify-center p-6 text-center hover:border-white/30 transition-colors">
@@ -166,8 +181,9 @@
                'TenBut': 'https://gc.fynn.qzz.io/En/TenBut/', 
                'WhoAmI': 'https://gc.fynn.qzz.io/En/WhoAmI/', 
                'MoreOrLess': 'https://gc.fynn.qzz.io/En/MoreOrLess/', 
+               'ShortFuse': 'https://gc.fynn.qzz.io/En/ShortFuse/',
                'WerewolfEarlyAccess': 'https://gc.fynn.qzz.io/En/Werewolf/'
-           };
+           };&& 
            window.location.href = pathMap[gameName] || 'https://gc.fynn.qzz.io/En/';
         };
     </script>
