@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Reveal Role</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; touch-action: none; }
+        
+        .card-stack { position: relative; width: 300px; height: 420px; margin: 0 auto; user-select: none; perspective: 1000px; }
+        
+        .role-card { 
+            position: absolute; inset: 0; border-radius: 2.5rem; display: flex; flex-direction: column; 
+            text-align: center; padding: 2rem; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Front of Card (The Cover) */
+        #card-front { 
+            background: linear-gradient(135deg, #4f46e5, #9333ea); 
+            color: white; z-index: 20; cursor: grab; 
+            border: 1px solid rgba(255,255,255,0.1);
+            justify-content: center; align-items: center;
+        }
+        #card-front:active { cursor: grabbing; }
+
+        /* Back of Card (The Role) */
+        #card-back { 
+            background: #1e293b; 
+            border: 2px solid rgba(255,255,255,0.1); 
+            z-index: 10; 
+            justify-content: center; align-items: center;
+            padding-bottom: 2rem;
+            /* Static position behind front */
+        }
+
+        .drag-hint { animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* Team Colors */
+        .text-wolf { color: #ef4444; }
+        .text-villager { color: #4ade80; }
+        .text-neutral { color: #e2e8f0; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-slate-950">
+    
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-extrabold text-white mb-1" id="main-title">Secret Identity</h2>
+            <p class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Pass device to <span id="current-player-name" class="text-white">...</span></p>
+        </div>
+
+        <div class="card-stack mb-8">
+            <div id="card-back" class="role-card">
+                <div id="role-icon" class="text-6xl mb-4">❓</div>
+                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">You are a</h2>
+                <h1 id="role-name" class="text-4xl font-black text-white mb-4 uppercase leading-tight">...</h1>
+                <p id="role-desc" class="text-sm font-medium text-gray-400 leading-relaxed">...</p>
+                <div id="team-badge" class="mt-6 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/5">...</div>
+            </div>
+
+            <div id="card-front" class="role-card">
+                <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 border border-white/20">
+                    <span class="text-4xl">🤫</span>
+                </div>
+                <h3 class="text-2xl font-black text-white mb-2">TAP & DRAG</h3>
+                <p class="text-xs font-bold text-indigo-200 opacity-70 uppercase tracking-widest mb-8">Slide up to reveal</p>
+                <div class="drag-hint text-white/50 text-2xl">▲</div>
+            </div>
+        </div>
+
+        <button onclick="confirmAndNext()" id="next-btn" class="w-full max-w-xs py-4 bg-slate-800 text-gray-500 font-bold rounded-xl transition-all uppercase tracking-widest text-sm" disabled>
+            Slide Up First
+        </button>
+
+    </main>
+
+    <script>
+        const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
+        let playersQueue = [];
+        let rolesDB = {};
+        let currentIndex = 0;
+        
+        // Drag Logic
+        let isDragging = false; 
+        let startY = 0; 
+        let currentY = 0;
+        let isRevealed = false;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Load Players
+            const payload = sessionStorage.getItem('werewolf_payload');
+            if(!payload) return window.location.href = 'index.html';
+            playersQueue = JSON.parse(payload);
+
+            // 2. Load Role Data (Descriptions/Icons)
+            try {
+                const res = await fetch(`${CDN_BASE}/Data/roles.json`);
+                const data = await res.json();
+                rolesDB = data.roles;
+                
+                setupRound();
+            } catch(e) {
+                alert("Error loading role data");
+            }
+
+            // 3. Attach Drag Events
+            const front = document.getElementById('card-front');
+            
+            front.addEventListener('mousedown', dragStart);
+            window.addEventListener('mousemove', dragMove);
+            window.addEventListener('mouseup', dragEnd);
+            
+            front.addEventListener('touchstart', (e) => dragStart(e.touches[0]));
+            window.addEventListener('touchmove', (e) => dragMove(e.touches[0]));
+            window.addEventListener('touchend', dragEnd);
+        });
+
+        function setupRound() {
+            // Reset State
+            isRevealed = false;
+            currentY = 0;
+            const front = document.getElementById('card-front');
+            front.style.transition = 'none'; // Snap back instantly
+            front.style.transform = 'translateY(0)';
+            front.style.opacity = '1';
+            
+            // Update UI Text
+            const player = playersQueue[currentIndex];
+            document.getElementById('current-player-name').innerText = player.name;
+            
+            // Update Back Card Content
+            const roleData = rolesDB[player.role];
+            
+            document.getElementById('role-icon').innerText = roleData.emoji || '🎲';
+            document.getElementById('role-name').innerText = roleData.name;
+            document.getElementById('role-desc').innerText = roleData.description;
+
+            // Styling based on Team
+            const nameEl = document.getElementById('role-name');
+            const badgeEl = document.getElementById('team-badge');
+            
+            nameEl.className = "text-4xl font-black mb-4 uppercase leading-tight"; // reset
+            badgeEl.className = "mt-6 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/5";
+
+            if(player.team === 'Werewolf') {
+                nameEl.classList.add('text-wolf');
+                badgeEl.innerText = "Team Evil";
+                badgeEl.classList.add('text-wolf');
+            } else if(player.team === 'Village') {
+                nameEl.classList.add('text-villager');
+                badgeEl.innerText = "Team Village";
+                badgeEl.classList.add('text-villager');
+            } else {
+                nameEl.classList.add('text-neutral');
+                badgeEl.innerText = "Neutral";
+                badgeEl.classList.add('text-neutral');
+            }
+
+            // Reset Button
+            const btn = document.getElementById('next-btn');
+            btn.disabled = true;
+            btn.className = "w-full max-w-xs py-4 bg-slate-800 text-gray-500 font-bold rounded-xl transition-all uppercase tracking-widest text-sm cursor-not-allowed";
+            btn.innerText = `Slide Up First (${currentIndex + 1}/${playersQueue.length})`;
+        }
+
+        // --- DRAG HANDLERS ---
+        function dragStart(e) {
+            isDragging = true;
+            startY = e.clientY;
+            document.getElementById('card-front').style.transition = 'none';
+        }
+
+        function dragMove(e) {
+            if(!isDragging) return;
+            const y = e.clientY;
+            const delta = y - startY;
+            
+            // Only allow dragging UP (negative delta)
+            currentY = Math.min(0, Math.max(-400, delta));
+            
+            const front = document.getElementById('card-front');
+            front.style.transform = `translateY(${currentY}px)`;
+            
+            // Fade out slightly as you drag up
+            const opacity = 1 - (Math.abs(currentY) / 300);
+            front.style.opacity = Math.max(0, opacity);
+        }
+
+        function dragEnd() {
+            if(!isDragging) return;
+            isDragging = false;
+            
+            const front = document.getElementById('card-front');
+            front.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease';
+
+            // Threshold to reveal (-150px)
+            if(currentY < -150) {
+                // Success: Slide completely out of view
+                front.style.transform = 'translateY(-600px)';
+                front.style.opacity = '0';
+                isRevealed = true;
+                enableButton();
+            } else {
+                // Fail: Snap back
+                front.style.transform = 'translateY(0)';
+                front.style.opacity = '1';
+            }
+        }
+
+        function enableButton() {
+            const btn = document.getElementById('next-btn');
+            btn.disabled = false;
+            const isLast = currentIndex >= playersQueue.length - 1;
+            
+            btn.className = "w-full max-w-xs py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black rounded-xl shadow-lg hover:scale-[1.02] transition-all uppercase tracking-widest text-sm";
+            btn.innerText = isLast ? "START GAME" : "CONFIRM & HIDE";
+        }
+
+        function confirmAndNext() {
+            if(!isRevealed) return;
+
+            if(currentIndex >= playersQueue.length - 1) {
+                window.location.href = 'Game.html';
+            } else {
+                currentIndex++;
+                setupRound();
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Werewolf Game</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+
+    <style>
+        /* BASE THEME */
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; min-height: 100vh; transition: background-color 1s ease; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: all 1s ease; z-index: 0; }
+        
+        /* TRANSITIONS */
+        .fade-enter { opacity: 0; transform: translateY(10px); }
+        .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.5s ease, transform 0.5s ease; }
+
+        /* DAY/NIGHT MODES */
+        body.mode-night { background-color: #020617; }
+        body.mode-day { background-color: #1e293b; }
+
+        /* COMPATIBILITY CLASSES */
+        .btn { width: 100%; padding: 1rem; border-radius: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; margin-bottom: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; }
+        .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+        
+        .btn-kill { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border: none; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        .btn-action { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="flex flex-col relative mode-night">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-indigo-600/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-purple-600/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 w-full max-w-xl mx-auto">
+
+        <div id="loading-view" class="text-center animate-pulse">
+            <h1 class="text-xl font-bold text-indigo-400 uppercase tracking-widest">Entering the Village...</h1>
+        </div>
+
+        <div id="narrator-view" class="hidden w-full text-center py-10 transition-all duration-500">
+            <div id="narrator-icon" class="text-6xl mb-8 opacity-80 animate-bounce">🌑</div>
+            <h2 id="narrator-sub" class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Night Phase</h2>
+            <h1 id="narrator-main" class="text-4xl sm:text-5xl font-black text-white mb-12 leading-tight drop-shadow-2xl">...</h1>
+            <button id="wake-btn" onclick="revealRoleView()" class="hidden w-full max-w-xs py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold text-xl rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest mx-auto">
+                I Am Ready
+            </button>
+        </div>
+
+        <div id="action-view" class="hidden w-full bg-slate-900/60 border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-md fade-enter-active"></div>
+
+        <div id="day-view" class="hidden w-full text-center fade-enter-active">
+            <div class="bg-slate-900/60 border border-white/10 rounded-3xl p-8 shadow-2xl backdrop-blur-md mb-8">
+                <div class="text-6xl mb-4">☀️</div>
+                <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 mb-4">Morning Report</h2>
+                <div id="morning-report" class="text-lg text-white font-medium leading-relaxed space-y-2">...</div>
+            </div>
+            
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Town Square Vote</h3>
+            <div id="vote-buttons" class="grid grid-cols-2 gap-2"></div>
+        </div>
+
+    </main>
+
+    <script>
+        const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
+        
+        let ROLES_DB = {};
+        let GameContext = {
+            players: [],
+            phase: 'init',
+            turn: 0,
+            nightActions: {},
+            activeRoleIndex: 0,
+            nightOrder: [],
+            links: [] // Stores Lover pairs [ ['p1', 'p2'] ]
+        };
+        window.RoleRegistry = {}; 
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const payload = sessionStorage.getItem('werewolf_payload');
+            if(!payload) return window.location.href = 'index.html';
+            GameContext.players = JSON.parse(payload);
+
+            try {
+                const res = await fetch(`${CDN_BASE}/Data/roles.json`);
+                const data = await res.json();
+                ROLES_DB = data.roles;
+
+                await loadRoleScripts();
+
+                document.getElementById('loading-view').classList.add('hidden');
+                startNightPhase();
+
+            } catch (err) {
+                alert("Game Error: " + err.message);
+                window.location.href = 'index.html';
+            }
+        });
+
+        async function loadRoleScripts() {
+            const activeRoles = [...new Set(GameContext.players.map(p => p.role))];
+            const promises = activeRoles.map(r => {
+                const config = ROLES_DB[r];
+                if(config.script && !window.RoleRegistry[r]) {
+                    return new Promise((resolve) => {
+                        const s = document.createElement('script');
+                        s.src = `${CDN_BASE}/Night/${config.script}`;
+                        s.onload = resolve;
+                        s.onerror = resolve; 
+                        document.head.appendChild(s);
+                    });
+                }
+                return Promise.resolve();
+            });
+            await Promise.all(promises);
+        }
+
+        // --- NIGHT ENGINE ---
+        function startNightPhase() {
+            GameContext.phase = 'night';
+            GameContext.nightActions = {}; // Reset nightly actions
+            // Note: We DO NOT reset GameContext.links, those persist forever
+            
+            document.body.className = 'mode-night';
+            document.getElementById('blob-1').className = "blob-bg bg-indigo-900/20 w-96 h-96 top-0 left-1/4 animate-drift";
+            document.getElementById('blob-2').className = "blob-bg bg-purple-900/20 w-80 h-80 top-40 right-1/4 animate-drift";
+
+            // Determine Awake Players (Everyone with a script, EVEN IF DEAD? 
+            // User requested: "other roles can still wake up even if their going to die")
+            // Standard logic: Dead players don't wake up. 
+            // BUT, since death is resolved at MORNING, everyone who was alive at dusk wakes up.
+            const awake = GameContext.players.filter(p => 
+                p.isAlive && ROLES_DB[p.role].script
+            );
+            
+            GameContext.nightOrder = awake.sort((a, b) => 
+                (ROLES_DB[a.role].priority || 99) - (ROLES_DB[b.role].priority || 99)
+            );
+            
+            GameContext.activeRoleIndex = 0;
+            
+            showNarrator("Night has fallen...", false);
+            setTimeout(() => {
+                nextTurn();
+            }, 3000);
+        }
+
+        function nextTurn() {
+            if(GameContext.activeRoleIndex >= GameContext.nightOrder.length) {
+                resolveNight();
+                return;
+            }
+
+            const p = GameContext.nightOrder[GameContext.activeRoleIndex];
+            
+            // Wake command
+            showNarrator(`${p.role}, wake up.`, true);
+        }
+
+        function revealRoleView() {
+            document.getElementById('narrator-view').classList.add('hidden');
+            const container = document.getElementById('action-view');
+            container.classList.remove('hidden');
+            container.innerHTML = '';
+
+            const p = GameContext.nightOrder[GameContext.activeRoleIndex];
+            
+            if(window.RoleRegistry[p.role]) {
+                // Pass context so roles can see current state (e.g. Witch sees Wolf Target)
+                const html = window.RoleRegistry[p.role].renderUI(GameContext, p);
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = `<div class="text-center"><p class="text-gray-400 mb-4">No action required.</p><button class="btn btn-action" onclick="finishTurn()">Continue</button></div>`;
+            }
+        }
+
+        // --- GLOBAL API ---
+        window.finishTurn = function(data) {
+            if(data) {
+                // Special handling for Cupid setting lovers
+                if(data.lovers) {
+                    // Store permanently in context
+                    GameContext.links = data.lovers; 
+                }
+                // Merge other data (kills, saves) into nightly actions
+                Object.assign(GameContext.nightActions, data);
+            }
+            
+            const p = GameContext.nightOrder[GameContext.activeRoleIndex];
+            
+            // UI Transition
+            document.getElementById('action-view').classList.add('hidden');
+            showNarrator(`${p.role}, close your eyes.`, false);
+            
+            // The Void Buffer
+            setTimeout(() => {
+                document.getElementById('narrator-main').style.opacity = '0';
+                document.getElementById('narrator-sub').style.opacity = '0';
+                document.getElementById('narrator-icon').style.opacity = '0';
+
+                setTimeout(() => {
+                    document.getElementById('narrator-main').style.opacity = '1';
+                    document.getElementById('narrator-sub').style.opacity = '1';
+                    document.getElementById('narrator-icon').style.opacity = '0.8';
+                    
+                    GameContext.activeRoleIndex++;
+                    nextTurn();
+                }, 3000); 
+            }, 3000); 
+        };
+
+        function showNarrator(text, showButton) {
+            const view = document.getElementById('narrator-view');
+            const main = document.getElementById('narrator-main');
+            const sub = document.getElementById('narrator-sub');
+            const btn = document.getElementById('wake-btn');
+            
+            document.getElementById('day-view').classList.add('hidden');
+            document.getElementById('action-view').classList.add('hidden');
+            view.classList.remove('hidden');
+
+            sub.innerText = showButton ? "Action Phase" : "Transition";
+            main.innerText = text;
+            
+            if(showButton) btn.classList.remove('hidden');
+            else btn.classList.add('hidden');
+        }
+
+        // --- DEATH RESOLUTION LOGIC ---
+        function resolveNight() {
+            showNarrator("The sun is rising...", false);
+            
+            setTimeout(() => {
+                document.body.className = 'mode-day';
+                document.getElementById('blob-1').className = "blob-bg bg-blue-500/20 w-96 h-96 top-0 left-1/4 animate-drift";
+                document.getElementById('blob-2').className = "blob-bg bg-cyan-500/20 w-80 h-80 top-40 right-1/4 animate-drift";
+
+                // 1. COLLECT POTENTIAL DEATHS
+                let confirmedDeaths = new Set();
+                let protectionSet = new Set(); // Who is safe?
+
+                // A. Attacks
+                const wolfTarget = GameContext.nightActions.wolfTarget;
+                const skTarget = GameContext.nightActions.skTarget;
+                const witchKill = GameContext.nightActions.witchKill;
+
+                // B. Protections
+                const doctorSave = GameContext.nightActions.doctorSave;
+                if (doctorSave) protectionSet.add(doctorSave);
+
+                // Witch Heal saves specifically the Wolf Target (usually)
+                if (GameContext.nightActions.witchUsedHeal && wolfTarget) {
+                    protectionSet.add(wolfTarget);
+                }
+
+                // C. Resolve Initial Deaths
+                // Wolf Kill (Blocked by protection)
+                if (wolfTarget && !protectionSet.has(wolfTarget)) {
+                    confirmedDeaths.add(wolfTarget);
+                }
+                
+                // Serial Killer (Usually unstoppable, but for MVP let's allow Doc to save everything)
+                // If you want SK to be unstoppable, remove the !protectionSet check here
+                if (skTarget && !protectionSet.has(skTarget)) {
+                    confirmedDeaths.add(skTarget);
+                }
+
+                // Witch Poison (Unstoppable)
+                if (witchKill) {
+                    confirmedDeaths.add(witchKill);
+                }
+
+                // D. Resolve Linked Deaths (Lovers)
+                // We loop until no new deaths are added (chain reaction)
+                let newDeathAdded = true;
+                while(newDeathAdded) {
+                    newDeathAdded = false;
+                    // Check every pair
+                    if(GameContext.links && GameContext.links.length === 2) {
+                        const [p1, p2] = GameContext.links;
+                        // If P1 is dead, P2 dies
+                        if(confirmedDeaths.has(p1) && !confirmedDeaths.has(p2)) {
+                            confirmedDeaths.add(p2);
+                            newDeathAdded = true;
+                        }
+                        // If P2 is dead, P1 dies
+                        if(confirmedDeaths.has(p2) && !confirmedDeaths.has(p1)) {
+                            confirmedDeaths.add(p1);
+                            newDeathAdded = true;
+                        }
+                    }
+                }
+
+                // E. Update State & Generate Message
+                let msgHtml = "";
+                if (confirmedDeaths.size === 0) {
+                    msgHtml = "It was a peaceful night. No one died.";
+                } else {
+                    const names = [];
+                    confirmedDeaths.forEach(id => {
+                        const p = GameContext.players.find(pl => pl.id === id);
+                        if(p) {
+                            p.isAlive = false;
+                            names.push(p.name);
+                        }
+                    });
+                    msgHtml = `<p class="text-red-400 font-bold mb-2">Tragedy struck!</p>`;
+                    msgHtml += names.map(n => `<p>${n} was found dead.</p>`).join('');
+                }
+
+                startDay(msgHtml);
+
+            }, 4000);
+        }
+
+        function startDay(msgHtml) {
+            document.getElementById('narrator-view').classList.add('hidden');
+            document.getElementById('day-view').classList.remove('hidden');
+            
+            document.getElementById('morning-report').innerHTML = msgHtml;
+            
+            const alive = GameContext.players.filter(p => p.isAlive);
+            const votes = document.getElementById('vote-buttons');
+            
+            votes.innerHTML = alive.map(p => `
+                <button onclick="lynch('${p.id}')" class="bg-white/5 border border-white/10 p-4 rounded-xl font-bold hover:bg-white/10 text-left transition-all flex justify-between items-center group">
+                    <span class="text-white group-hover:text-blue-300 transition-colors">${p.name}</span>
+                    <span class="text-xs text-gray-500 uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100">Vote</span>
+                </button>
+            `).join('');
+
+            checkWin();
+        }
+
+        window.lynch = function(id) {
+            const p = GameContext.players.find(x => x.id === id);
+            if(!confirm(`Are you sure you want to vote out ${p.name}?`)) return;
+            
+            p.isAlive = false;
+            
+            // Jester Win Check
+            if(p.role === 'Jester') {
+                alert("Jester was voted out! JESTER WINS!");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            alert(`${p.name} was executed.\nThey were: ${p.role}`);
+            
+            // Handle Jester/Lover death chains (if Jester was linked? Edge case, let's skip for MVP)
+            
+            if(!checkWin()) {
+                startNightPhase();
+            }
+        };
+
+        function checkWin() {
+            const alive = GameContext.players.filter(p => p.isAlive);
+            const wolves = alive.filter(p => p.team === 'Werewolf').length;
+            const goods = alive.filter(p => p.team === 'Village').length;
+            const serialKiller = alive.find(p => p.role === 'Serial Killer');
+
+            // 1. Serial Killer Win (Last one standing)
+            if(alive.length === 1 && serialKiller) {
+                alert("The Serial Killer is the last one alive! SERIAL KILLER WINS!");
+                window.location.href = 'index.html';
+                return true;
+            }
+            
+            // 2. Lovers Win (Last two alive and linked)
+            if(alive.length === 2 && GameContext.links && GameContext.links.length === 2) {
+                const [l1, l2] = GameContext.links;
+                if(alive.find(p => p.id === l1) && alive.find(p => p.id === l2)) {
+                    alert("Love Conquers All! THE LOVERS WIN!");
+                    window.location.href = 'index.html';
+                    return true;
+                }
+            }
+
+            // 3. Village Win
+            if(wolves === 0 && !serialKiller) {
+                alert("The Village has won! All evil is destroyed.");
+                window.location.href = 'index.html'; 
+                return true;
+            }
+
+            // 4. Werewolf Win
+            if(wolves >= goods && !serialKiller) {
+                alert("The Werewolves have won! The village is overrun.");
+                window.location.href = 'index.html'; 
+                return true;
+            }
+            return false;
+        }
+    </script>
+</body>
+</html>

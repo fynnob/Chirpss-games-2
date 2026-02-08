@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Werewolf Debugger</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; background-color: #0f172a; color: #a5b4fc; }
+        
+        /* Debug Grid Layout */
+        .debug-grid { display: grid; grid-template-columns: 250px 1fr 300px; height: 100vh; gap: 1px; background: #334155; }
+        .panel { background: #0f172a; padding: 1rem; overflow-y: auto; }
+        
+        /* Components */
+        .player-row { padding: 0.5rem; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        .player-row.dead { opacity: 0.5; text-decoration: line-through; color: #ef4444; }
+        .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .tag-wolf { background: #ef4444; color: black; }
+        .tag-good { background: #4ade80; color: black; }
+        .tag-neutral { background: #e2e8f0; color: black; }
+        
+        .log-entry { margin-bottom: 0.5rem; font-size: 0.8rem; border-left: 2px solid #6366f1; padding-left: 0.5rem; }
+        .log-error { border-left-color: #ef4444; color: #fca5a5; }
+        .log-success { border-left-color: #4ade80; color: #86efac; }
+
+        .btn-debug { width: 100%; text-align: left; padding: 0.5rem; background: #1e293b; margin-bottom: 0.25rem; border: 1px solid #334155; color: white; cursor: pointer; }
+        .btn-debug:hover { background: #334155; }
+        .btn-action { background: #4f46e5; border-color: #6366f1; text-align: center; font-weight: bold; }
+        
+        /* Mocking the Game.html Styles for the script rendering */
+        #game-mock-container {
+            background: #1e293b; border-radius: 1rem; padding: 2rem;
+            max-width: 500px; margin: 2rem auto; border: 1px solid #475569;
+        }
+        /* Compatibility classes for roles */
+        .btn { display: block; width: 100%; padding: 10px; margin-bottom: 5px; background: #334155; color: white; border-radius: 5px; }
+        .btn-kill { background: #7f1d1d; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="debug-grid">
+
+    <div class="panel flex flex-col">
+        <h2 class="text-xl font-bold text-white mb-4">SETUP</h2>
+        
+        <div class="mb-4">
+            <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Quick Spawn</h3>
+            <button onclick="quickSpawn(['Werewolf', 'Seer', 'Villager'])" class="btn-debug">3P: Wolf/Seer/Vil</button>
+            <button onclick="quickSpawn(['Werewolf', 'Doctor', 'Seer', 'Villager'])" class="btn-debug">4P: Classic</button>
+            <button onclick="quickSpawn(['Werewolf', 'Witch', 'Serial Killer', 'Cupid', 'Villager'])" class="btn-debug">5P: Chaos Mode</button>
+        </div>
+
+        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Player State</h3>
+        <div id="player-list" class="flex-grow mb-4 text-sm"></div>
+
+        <div class="border-t border-gray-700 pt-4">
+             <button onclick="resetGame()" class="btn-debug text-red-400">RESET ENGINE</button>
+        </div>
+    </div>
+
+    <div class="panel flex flex-col items-center bg-gray-900 relative">
+        <div class="absolute top-4 left-4 text-xs font-bold bg-black/50 px-2 py-1 rounded">
+            PHASE: <span id="phase-display" class="text-white">INIT</span>
+        </div>
+        
+        <div id="game-mock-container" class="w-full">
+            <div class="text-center text-gray-500 py-10">
+                Waiting for game start...
+            </div>
+        </div>
+
+        <div class="mt-8 flex gap-2 w-full max-w-md">
+            <button onclick="forceNextTurn()" class="flex-1 btn-debug btn-action">FORCE NEXT TURN</button>
+            <button onclick="resolveNight()" class="flex-1 btn-debug btn-action bg-yellow-600 border-yellow-500">SKIP TO DAY</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2 class="text-xl font-bold text-white mb-4">CONSOLE</h2>
+        <div id="console-log" class="font-mono text-xs h-[60vh] overflow-y-auto mb-4"></div>
+        
+        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Live Data</h3>
+        <pre id="data-dump" class="text-[10px] text-gray-400 overflow-x-auto"></pre>
+        
+        <button onclick="checkWinCondition()" class="btn-debug mt-4 border-green-800 text-green-400">CHECK WIN CONDITION</button>
+    </div>
+
+    <script>
+        const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
+        let ROLES_DB = {};
+        
+        // Mocking the Game Engine
+        let GameContext = {
+            players: [],
+            phase: 'setup',
+            turn: 0,
+            nightActions: {},
+            activeRoleIndex: 0,
+            nightOrder: [],
+            links: []
+        };
+        window.RoleRegistry = {};
+
+        // --- INIT ---
+        async function loadDB() {
+            log("Fetching roles.json...", "neutral");
+            try {
+                const res = await fetch(`${CDN_BASE}/Data/roles.json`);
+                const data = await res.json();
+                ROLES_DB = data.roles;
+                log("Database Loaded.", "success");
+            } catch(e) {
+                log("Failed to load DB: " + e.message, "error");
+            }
+        }
+        loadDB();
+
+        // --- SETUP ---
+        async function quickSpawn(roleList) {
+            log(`Spawning game with: ${roleList.join(', ')}`);
+            
+            GameContext.players = roleList.map((role, i) => ({
+                id: 'p' + i,
+                name: `Bot ${role} ${i+1}`,
+                role: role,
+                team: ROLES_DB[role].team,
+                isAlive: true
+            }));
+
+            // Load scripts dynamically
+            log("Loading Role Scripts...");
+            const uniqueRoles = [...new Set(roleList)];
+            
+            const promises = uniqueRoles.map(r => {
+                const config = ROLES_DB[r];
+                if(config.hasNightAction && config.script && !window.RoleRegistry[r]) {
+                    return new Promise((resolve) => {
+                        const s = document.createElement('script');
+                        s.src = `${CDN_BASE}/Night/${config.script}`;
+                        s.onload = () => { log(`Loaded ${config.script}`, 'success'); resolve(); };
+                        s.onerror = () => { log(`Failed ${config.script}`, 'error'); resolve(); };
+                        document.head.appendChild(s);
+                    });
+                }
+                return Promise.resolve();
+            });
+
+            await Promise.all(promises);
+            updateDebugUI();
+            startNight();
+        }
+
+        // --- ENGINE LOOP ---
+        function startNight() {
+            GameContext.phase = 'night';
+            GameContext.nightActions = {};
+            GameContext.turn++;
+            
+            const awake = GameContext.players.filter(p => p.isAlive && ROLES_DB[p.role].hasNightAction);
+            GameContext.nightOrder = awake.sort((a,b) => ROLES_DB[a.role].priority - ROLES_DB[b.role].priority);
+            GameContext.activeRoleIndex = 0;
+            
+            log(`--- NIGHT ${GameContext.turn} STARTED ---`);
+            log(`Wake Order: ${GameContext.nightOrder.map(p => p.role).join(' -> ')}`);
+            
+            renderTurn();
+        }
+
+        function renderTurn() {
+            updateDebugUI();
+            
+            if(GameContext.activeRoleIndex >= GameContext.nightOrder.length) {
+                document.getElementById('game-mock-container').innerHTML = `
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-white">Night Ended</h2>
+                        <p>Waiting to resolve...</p>
+                    </div>`;
+                return;
+            }
+
+            const p = GameContext.nightOrder[GameContext.activeRoleIndex];
+            log(`Waking up: ${p.name} (${p.role})`);
+            
+            const container = document.getElementById('game-mock-container');
+            container.innerHTML = '';
+            
+            if(window.RoleRegistry[p.role]) {
+                container.innerHTML = window.RoleRegistry[p.role].renderUI(GameContext, p);
+            } else {
+                container.innerHTML = `<div class="text-red-500">Script missing for ${p.role}</div>`;
+            }
+        }
+
+        function forceNextTurn() {
+            GameContext.activeRoleIndex++;
+            renderTurn();
+        }
+
+        // --- GLOBAL API MOCK ---
+        window.finishTurn = function(data) {
+            if(data) {
+                if(data.lovers) GameContext.links = data.lovers;
+                Object.assign(GameContext.nightActions, data);
+                log("Action Received: " + JSON.stringify(data), "success");
+            } else {
+                log("Player skipped action.");
+            }
+            
+            forceNextTurn();
+        };
+
+        // --- RESOLUTION LOGIC (COPIED FROM GAME.HTML) ---
+        function resolveNight() {
+            log("RESOLVING NIGHT...", "neutral");
+            
+            let confirmedDeaths = new Set();
+            let protectionSet = new Set(); 
+
+            const wolfTarget = GameContext.nightActions.wolfTarget;
+            const skTarget = GameContext.nightActions.skTarget;
+            const witchKill = GameContext.nightActions.witchKill;
+            const doctorSave = GameContext.nightActions.doctorSave;
+
+            if (doctorSave) protectionSet.add(doctorSave);
+            if (GameContext.nightActions.witchUsedHeal && wolfTarget) protectionSet.add(wolfTarget);
+
+            if (wolfTarget && !protectionSet.has(wolfTarget)) confirmedDeaths.add(wolfTarget);
+            if (skTarget && !protectionSet.has(skTarget)) confirmedDeaths.add(skTarget);
+            if (witchKill) confirmedDeaths.add(witchKill);
+
+            // Lovers Logic
+            let newDeathAdded = true;
+            while(newDeathAdded) {
+                newDeathAdded = false;
+                if(GameContext.links && GameContext.links.length === 2) {
+                    const [p1, p2] = GameContext.links;
+                    if(confirmedDeaths.has(p1) && !confirmedDeaths.has(p2)) {
+                        confirmedDeaths.add(p2); newDeathAdded = true; log(`Chain reaction: ${p2} died of love.`);
+                    }
+                    if(confirmedDeaths.has(p2) && !confirmedDeaths.has(p1)) {
+                        confirmedDeaths.add(p1); newDeathAdded = true; log(`Chain reaction: ${p1} died of love.`);
+                    }
+                }
+            }
+
+            // Apply Deaths
+            confirmedDeaths.forEach(id => {
+                const p = GameContext.players.find(pl => pl.id === id);
+                if(p) {
+                    p.isAlive = false;
+                    log(`DIED: ${p.name} (${p.role})`, "error");
+                }
+            });
+
+            GameContext.phase = 'day';
+            updateDebugUI();
+            
+            const container = document.getElementById('game-mock-container');
+            container.innerHTML = `<div class="text-center"><h1 class="text-3xl">☀️ DAY BREAK</h1><p>${confirmedDeaths.size} deaths.</p></div>`;
+        }
+
+        function checkWinCondition() {
+            const alive = GameContext.players.filter(p => p.isAlive);
+            const wolves = alive.filter(p => p.team === 'Werewolf').length;
+            const goods = alive.filter(p => p.team === 'Village').length;
+            const sk = alive.find(p => p.role === 'Serial Killer');
+
+            log(`WIN CHECK: Wolves: ${wolves}, Good: ${goods}, SK: ${!!sk}`);
+
+            if(alive.length === 1 && sk) return log(">> SERIAL KILLER WINS", "success");
+            if(wolves === 0 && !sk) return log(">> VILLAGE WINS", "success");
+            if(wolves >= goods && !sk) return log(">> WEREWOLVES WIN", "success");
+            if(alive.length === 2 && GameContext.links.length === 2) {
+                 const [l1, l2] = GameContext.links;
+                 if(alive.find(p => p.id === l1) && alive.find(p => p.id === l2)) return log(">> LOVERS WIN", "success");
+            }
+            
+            log(">> GAME CONTINUES");
+        }
+
+        // --- UI UTILS ---
+        function log(msg, type="") {
+            const div = document.createElement('div');
+            div.className = `log-entry log-${type}`;
+            div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            document.getElementById('console-log').prepend(div);
+        }
+
+        function updateDebugUI() {
+            document.getElementById('phase-display').innerText = GameContext.phase.toUpperCase();
+            
+            const list = document.getElementById('player-list');
+            list.innerHTML = GameContext.players.map(p => {
+                let teamClass = p.team === 'Werewolf' ? 'tag-wolf' : (p.team === 'Village' ? 'tag-good' : 'tag-neutral');
+                return `
+                <div class="player-row ${!p.isAlive ? 'dead' : ''}">
+                    <div>
+                        <span class="font-bold">${p.name}</span>
+                        <div class="text-xs text-gray-500">ID: ${p.id}</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="tag ${teamClass}">${p.role}</span>
+                        ${GameContext.links.includes(p.id) ? '❤️' : ''}
+                    </div>
+                </div>`;
+            }).join('');
+
+            document.getElementById('data-dump').innerText = JSON.stringify(GameContext.nightActions, null, 2);
+        }
+
+        function resetGame() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

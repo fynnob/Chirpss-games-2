@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Werewolf Setup</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
+
+    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
+    <script src="https://cdn.fynn.qzz.io/cookies.js" defer></script> 
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; }
+        .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: transform 0.1s linear; z-index: 0; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        .modal-enter { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .modal-enter-active { opacity: 1; transform: scale(1); pointer-events: auto; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative bg-slate-950">
+
+    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div id="blob-1" class="blob-bg bg-indigo-600/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
+        <div id="blob-2" class="blob-bg bg-purple-600/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+    </div>
+
+    <chirpss-header></chirpss-header>
+
+    <main class="relative z-10 max-w-2xl mx-auto p-4 sm:p-8 flex-grow w-full">
+        
+        <div class="text-center mb-8 animate-fade-in-up">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Werewolf Setup</h2>
+        </div>
+
+        <div class="bg-slate-900/60 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+            
+            <div class="mb-8">
+                <label class="block text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">Add Players</label>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="player-input" placeholder="Name" class="flex-grow bg-white/5 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500">
+                    <button type="button" onclick="addPlayer()" class="bg-indigo-600 text-white px-6 rounded-xl font-bold hover:bg-indigo-500 active:scale-95 transition-all">Add</button>
+                </div>
+                
+                <div id="player-list" class="flex flex-wrap gap-2 min-h-[40px] mb-2"></div>
+                
+                <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                    <span id="player-count-display">Players: 0 (Min 3)</span>
+                    <button onclick="resetPlayers()" class="text-red-400 hover:text-red-300">Reset All</button>
+                </div>
+            </div>
+
+            <hr class="border-white/5 my-8">
+
+            <div>
+                <div class="flex justify-between items-end mb-4">
+                    <label class="block text-sm font-bold text-purple-400 uppercase tracking-widest">Deck Composition</label>
+                    <button onclick="openRoleModal()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors font-bold">+ Add Special Role</button>
+                </div>
+
+                <div id="active-roles-list" class="space-y-2">
+                    </div>
+
+                <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+                    <div>
+                        <span class="text-xs font-bold text-gray-500 uppercase block">Cards Assigned</span>
+                        <span id="deck-status-text" class="text-[10px] text-red-400 hidden">Check player count!</span>
+                    </div>
+                    <div class="text-right">
+                        <span id="deck-count-display" class="text-2xl font-black text-white">0</span>
+                        <span class="text-gray-500 text-sm">/</span>
+                        <span id="req-count-display" class="text-xl font-bold text-gray-500">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startGame()" id="start-btn" class="w-full mt-8 py-4 bg-gray-800 text-gray-500 font-extrabold text-xl rounded-xl cursor-not-allowed transition-all uppercase tracking-widest" disabled>
+                Start Game
+            </button>
+
+            <button onclick="openRulesModal()" class="w-full mt-3 py-3 bg-white/5 text-indigo-300 font-bold text-sm rounded-xl hover:bg-white/10 transition-all uppercase tracking-widest border border-white/5">
+                How to Play
+            </button>
+
+        </div>
+    </main>
+
+    <div id="role-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200">
+        <div class="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-800/50">
+                <h3 class="font-bold text-white">Role Library</h3>
+                <button onclick="closeRoleModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+            </div>
+            <div class="p-4 space-y-4 bg-slate-900">
+                <input type="text" id="role-search" placeholder="Search roles..." class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                <div class="flex gap-2">
+                    <button onclick="filterRoles('all')" class="filter-tab active px-3 py-1 text-xs font-bold rounded-lg bg-white/10 text-white" data-filter="all">All</button>
+                    <button onclick="filterRoles('Village')" class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Village">Good</button>
+                    <button onclick="filterRoles('Werewolf')" class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Werewolf">Evil</button>
+                    <button onclick="filterRoles('Neutral')" class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Neutral">Neutral</button>
+                </div>
+            </div>
+            <div id="role-library-grid" class="p-4 overflow-y-auto custom-scrollbar grid grid-cols-1 gap-2"></div>
+        </div>
+    </div>
+
+    <div id="role-details-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md modal-enter transition-all duration-200" onclick="closeRoleDetails()">
+        <div class="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative" onclick="event.stopPropagation()">
+            <div class="p-6 text-center border-b border-white/5 bg-slate-800/30">
+                <div id="detail-emoji" class="text-6xl mb-4 filter drop-shadow-lg">❓</div>
+                <h2 id="detail-name" class="text-3xl font-black text-white mb-1">Role Name</h2>
+                <div id="detail-badge" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10">Team</div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Activation</h3>
+                    <p id="detail-activation" class="text-sm text-white font-medium">When they wake up...</p>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Ability</h3>
+                    <p id="detail-desc" class="text-sm text-gray-400 leading-relaxed">What they do...</p>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Win Condition</h3>
+                    <p id="detail-win" class="text-sm text-white font-medium">How they win...</p>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-800/30 border-t border-white/5">
+                <button onclick="closeRoleDetails()" class="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rules-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200" onclick="closeRulesModal()">
+        <div class="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative" onclick="event.stopPropagation()">
+            
+            <div class="p-6 pb-2 border-b border-white/5 bg-slate-800/30">
+                <h2 class="text-2xl font-black text-white mb-1">How to Play</h2>
+                <p class="text-xs text-indigo-400 font-bold uppercase tracking-widest">The Ultimate Party Game</p>
+                <button onclick="closeRulesModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-gray-400 hover:text-white">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black border border-indigo-500/30">1</div>
+                    <div><h3 class="font-bold text-white mb-1">Secret Identity</h3><p class="text-sm text-gray-400 leading-relaxed">Pass the device around. Everyone learns their secret role (Villager, Werewolf, or Special) but must keep it hidden!</p></div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-black border border-purple-500/30">2</div>
+                    <div><h3 class="font-bold text-white mb-1">Night Phase</h3><p class="text-sm text-gray-400 leading-relaxed">Everyone closes their eyes. The app wakes up special roles (Werewolves, Seer, Doctor) one by one to perform secret actions.</p></div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-black border border-blue-500/30">3</div>
+                    <div><h3 class="font-bold text-white mb-1">Day Phase</h3><p class="text-sm text-gray-400 leading-relaxed">The sun rises. If someone died, they are out. Survivors discuss and vote to eliminate a suspect they think is a Werewolf.</p></div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-black border border-green-500/30">4</div>
+                    <div><h3 class="font-bold text-white mb-1">Winning</h3><p class="text-sm text-gray-400 leading-relaxed"><strong class="text-green-400">Village:</strong> Eliminate all Werewolves.<br><strong class="text-red-400">Werewolves:</strong> Equal or outnumber the Villagers.</p></div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-white/5 bg-slate-800/30">
+                <button onclick="closeRulesModal()" class="w-full py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-gray-200">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <chirpss-footer></chirpss-footer>
+
+    <script>
+        const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
+        let ROLES_DB = {};
+        let roleCounts = {}; 
+        let players = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch(`${CDN_BASE}/Data/roles.json`);
+                const data = await res.json();
+                ROLES_DB = data.roles;
+                
+                // Defaults
+                roleCounts['Werewolf'] = 1;
+                roleCounts['Villager'] = 0; 
+                
+                Object.keys(ROLES_DB).forEach(k => {
+                   if(ROLES_DB[k].default > 0 && k !== 'Werewolf' && k !== 'Villager') roleCounts[k] = ROLES_DB[k].default; 
+                });
+
+                updateUI();
+                renderRoleLibrary();
+            } catch (err) {
+                console.error(err);
+                alert("Could not load game data.");
+            }
+        });
+
+        // --- PLAYER LOGIC ---
+        function addPlayer() {
+            const input = document.getElementById('player-input');
+            const name = input.value.trim();
+            if(name && !players.includes(name)) {
+                players.push(name);
+                input.value = '';
+                updateUI();
+            }
+        }
+
+        function removePlayer(name) {
+            players = players.filter(p => p !== name);
+            updateUI();
+        }
+        
+        function resetPlayers() {
+            players = [];
+            updateUI();
+        }
+        
+        document.getElementById('player-input').addEventListener('keydown', (e) => { 
+            if(e.key === 'Enter') { e.preventDefault(); addPlayer(); }
+        });
+
+        // --- DECK LOGIC ---
+        function adjustRole(key, delta) {
+            const role = ROLES_DB[key];
+            const max = role.max || 99;
+            const current = roleCounts[key] || 0;
+            const next = current + delta;
+            if (next < 0 || next > max) return;
+            roleCounts[key] = next;
+            updateUI();
+        }
+
+        // --- UI RENDERER ---
+        function updateUI() {
+            // 1. Players
+            document.getElementById('player-list').innerHTML = players.map(p => `
+                <div class="bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                    ${p} <button type="button" onclick="removePlayer('${p}')" class="hover:text-white">×</button>
+                </div>`).join('');
+            
+            document.getElementById('player-count-display').innerText = `Players: ${players.length} (Min 3)`;
+            document.getElementById('req-count-display').innerText = players.length;
+
+            // 2. Roles Calculation
+            const specialCount = Object.keys(roleCounts)
+                .filter(k => k !== 'Villager')
+                .reduce((sum, k) => sum + roleCounts[k], 0);
+            
+            let autoVillagers = Math.max(0, players.length - specialCount);
+            roleCounts['Villager'] = autoVillagers;
+
+            // 3. Render List
+            const activeKeys = Object.keys(roleCounts).filter(k => 
+                roleCounts[k] > 0 || k === 'Villager' || k === 'Werewolf'
+            );
+            
+            activeKeys.sort((a, b) => {
+                if(a === 'Villager') return -1;
+                if(b === 'Villager') return 1;
+                if(a === 'Werewolf') return -1;
+                if(b === 'Werewolf') return 1;
+                return 0; 
+            });
+
+            const listContainer = document.getElementById('active-roles-list');
+            listContainer.innerHTML = '';
+
+            activeKeys.forEach(key => {
+                const role = ROLES_DB[key];
+                const count = roleCounts[key];
+                const isVillager = key === 'Villager';
+
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5";
+                
+                let teamColor = "text-white"; 
+                if(role.team === 'Werewolf') teamColor = "text-red-400";
+                if(role.team === 'Village') teamColor = "text-green-400"; 
+                
+                let nameHtml = role.name;
+                if (role.max === 1) {
+                    nameHtml += ` <span class="ml-2 text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">UNIQUE</span>`;
+                }
+
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${role.emoji || '❓'}</span>
+                        <div>
+                            <p class="font-bold text-sm ${teamColor} flex items-center">${nameHtml}</p>
+                            <p class="text-[10px] text-gray-400 leading-tight">${role.description}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center bg-black/30 rounded-lg p-1">
+                        <button onclick="adjustRole('${key}', -1)" class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white rounded ${isVillager ? 'invisible' : ''}" ${isVillager ? 'disabled' : ''}>-</button>
+                        <span class="font-mono font-bold w-6 text-center ${isVillager ? 'text-green-400' : 'text-white'}">${count}</span>
+                        <button onclick="adjustRole('${key}', 1)" class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white rounded ${isVillager ? 'invisible' : ''}" ${count >= (role.max||99) || isVillager ? 'disabled style="opacity:0.3"' : ''}>+</button>
+                    </div>
+                `;
+                listContainer.appendChild(div);
+            });
+
+            const totalCards = specialCount + autoVillagers;
+            document.getElementById('deck-count-display').innerText = totalCards;
+            
+            const btn = document.getElementById('start-btn');
+            const statusText = document.getElementById('deck-status-text');
+
+            let isValid = players.length >= 3 && totalCards === players.length;
+            
+            if(isValid) {
+                btn.disabled = false;
+                btn.className = "w-full mt-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold text-xl rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-widest";
+                statusText.classList.add('hidden');
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full mt-8 py-4 bg-gray-800 text-gray-500 font-extrabold text-xl rounded-xl cursor-not-allowed transition-all uppercase tracking-widest";
+                statusText.classList.remove('hidden');
+            }
+        }
+
+        // --- ROLE LIBRARY ---
+        function openRoleModal() {
+            renderRoleLibrary(); 
+            document.getElementById('role-modal').classList.remove('modal-enter');
+            document.getElementById('role-modal').classList.add('modal-enter-active');
+        }
+        function closeRoleModal() {
+            document.getElementById('role-modal').classList.remove('modal-enter-active');
+            document.getElementById('role-modal').classList.add('modal-enter');
+        }
+
+        function renderRoleLibrary() {
+            const grid = document.getElementById('role-library-grid');
+            grid.innerHTML = '';
+            
+            Object.keys(ROLES_DB).forEach(key => {
+                if(key === 'Villager' || key === 'Werewolf') return; 
+                if(roleCounts[key] > 0) return; 
+
+                const role = ROLES_DB[key];
+                const card = document.createElement('div');
+                card.className = "role-item bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/5 flex items-center justify-between transition-colors cursor-pointer group relative";
+                card.dataset.team = role.team;
+                card.dataset.name = role.name.toLowerCase();
+                
+                // Click card to add
+                card.onclick = (e) => { 
+                    // Prevent if clicking the question mark
+                    if(e.target.closest('.info-btn')) return;
+                    adjustRole(key, 1); closeRoleModal(); 
+                };
+
+                let badge = role.team === 'Werewolf' ? `<span class="text-[10px] bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded ml-2">EVIL</span>` : 
+                           (role.team === 'Village' ? `<span class="text-[10px] bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded ml-2">GOOD</span>` : 
+                           `<span class="text-[10px] bg-white/10 text-white px-1.5 py-0.5 rounded ml-2">NEUTRAL</span>`);
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl group-hover:scale-110 transition-transform">${role.emoji || '❓'}</span>
+                        <div>
+                            <p class="font-bold text-sm text-white flex items-center">${role.name} ${badge}</p>
+                            <p class="text-[10px] text-gray-400">${role.description}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-3">
+                         <button onclick="openRoleDetails('${key}')" class="info-btn w-6 h-6 flex items-center justify-center rounded-full bg-white/10 text-gray-400 hover:bg-white/20 hover:text-white text-xs font-bold transition-colors">?</button>
+                         <span class="text-indigo-400 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">+ Add</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            if (grid.children.length === 0) {
+                grid.innerHTML = `<div class="text-center text-gray-500 text-sm py-4">All available roles added.</div>`;
+            }
+        }
+
+        // --- DETAILS POPUP ---
+        function openRoleDetails(key) {
+            const role = ROLES_DB[key];
+            document.getElementById('detail-emoji').innerText = role.emoji || '❓';
+            document.getElementById('detail-name').innerText = role.name;
+            document.getElementById('detail-desc').innerText = role.description;
+            document.getElementById('detail-activation').innerText = role.activation || "See role card.";
+            document.getElementById('detail-win').innerText = role.winCondition || "See role card.";
+            
+            const badge = document.getElementById('detail-badge');
+            if(role.team === 'Werewolf') { badge.innerText = "Team Evil"; badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-red-500/20 text-red-400"; }
+            else if(role.team === 'Village') { badge.innerText = "Team Good"; badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-green-500/20 text-green-400"; }
+            else { badge.innerText = "Neutral"; badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10 text-white"; }
+
+            document.getElementById('role-details-modal').classList.remove('modal-enter');
+            document.getElementById('role-details-modal').classList.add('modal-enter-active');
+        }
+
+        function closeRoleDetails() {
+            document.getElementById('role-details-modal').classList.remove('modal-enter-active');
+            document.getElementById('role-details-modal').classList.add('modal-enter');
+        }
+
+        // --- FILTERS ---
+        function filterRoles(filter) {
+            document.querySelectorAll('.filter-tab').forEach(b => {
+                b.classList.toggle('bg-white/10', b.dataset.filter === filter);
+                b.classList.toggle('text-white', b.dataset.filter === filter);
+                b.classList.toggle('text-gray-400', b.dataset.filter !== filter);
+            });
+            document.querySelectorAll('.role-item').forEach(item => {
+                item.classList.toggle('hidden', filter !== 'all' && item.dataset.team !== filter);
+            });
+        }
+
+        document.getElementById('role-search').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.role-item').forEach(item => {
+                item.classList.toggle('hidden', !item.dataset.name.includes(term));
+            });
+        });
+
+        // --- START GAME ---
+        function startGame() {
+            let deck = [];
+            Object.keys(roleCounts).forEach(key => {
+                if(key === 'Villager') return;
+                for(let i=0; i<roleCounts[key]; i++) deck.push(key);
+            });
+            while(deck.length < players.length) deck.push("Villager");
+            deck.sort(() => Math.random() - 0.5);
+
+            const gameData = players.map((name, i) => ({
+                id: 'p' + i,
+                name: name,
+                role: deck[i],
+                team: ROLES_DB[deck[i]].team,
+                isAlive: true
+            }));
+
+            sessionStorage.setItem('werewolf_payload', JSON.stringify(gameData));
+            window.location.href = 'RevealRole.html';
+        }
+
+        // --- RULES ---
+        function openRulesModal() { document.getElementById('rules-modal').classList.remove('modal-enter'); document.getElementById('rules-modal').classList.add('modal-enter-active'); }
+        function closeRulesModal() { document.getElementById('rules-modal').classList.remove('modal-enter-active'); document.getElementById('rules-modal').classList.add('modal-enter'); }
+    </script>
+</body>
+</html>
