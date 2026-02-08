@@ -80,6 +80,15 @@
         <div class="flex-grow flex items-center justify-center p-4">
             <div id="game-mock-container"><div class="text-center text-gray-500 py-10">Select roles to start...</div></div>
         </div>
+
+        <div class="w-full p-2 bg-slate-900 border-t border-slate-800 z-10 flex gap-2">
+            <button onclick="forceNextTurn()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-3 rounded border border-slate-700">
+                ⏭ NEXT ROLE
+            </button>
+            <button onclick="forceNextPhase()" class="flex-1 bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold py-3 rounded border border-indigo-700">
+                ☀️/🌑 NEXT PHASE
+            </button>
+        </div>
     </div>
 
     <div class="panel">
@@ -150,7 +159,6 @@
 
         // --- GAME SPAWN ---
         async function quickSpawn(roleList) {
-            // Reset
             GameContext = { players: [], phase: 'setup', turn: 0, nightActions: {}, activeRoleIndex: 0, nightOrder: [], links: [], lynchedId: null };
             window.RoleRegistry = {};
             window.WinRegistry = {};
@@ -159,27 +167,20 @@
             log(`Spawning ${roleList.length} players...`);
             GameContext.players = roleList.map((role, i) => ({ id: 'p' + i, name: `${role} ${i+1}`, role: role, team: ROLES_DB[role].team, isAlive: true }));
             
-            // 1. Load Night Scripts
             const uniqueRoles = [...new Set(roleList)];
             const nightPromises = uniqueRoles.map(r => {
                 const config = ROLES_DB[r];
-                if(config.hasNightAction && config.script) {
-                    return loadScript(`${CDN_BASE}/Night/${config.script}`);
-                }
+                if(config.hasNightAction && config.script) return loadScript(`${CDN_BASE}/Night/${config.script}`);
                 return Promise.resolve();
             });
 
-            // 2. Load Win Scripts
-            // Ensure Villager/Werewolf win logic is loaded even if not in deck (for safety/default checks)
             let winRoles = [...uniqueRoles];
             if(!winRoles.includes('Villager')) winRoles.push('Villager');
             if(!winRoles.includes('Werewolf')) winRoles.push('Werewolf');
             
             const winPromises = winRoles.map(r => {
                 const config = ROLES_DB[r];
-                if(config.winScript) {
-                    return loadScript(`${CDN_BASE}/WinConditions/${config.winScript}`);
-                }
+                if(config.winScript) return loadScript(`${CDN_BASE}/WinConditions/${config.winScript}`);
                 return Promise.resolve();
             });
 
@@ -196,6 +197,21 @@
                 s.onerror = () => { log(`Err: ${src}`, 'error'); resolve(); };
                 document.head.appendChild(s);
             });
+        }
+
+        // --- CONTROLS ---
+        function forceNextTurn() {
+            if(GameContext.phase !== 'night') return log("Can only skip roles at night.", "error");
+            GameContext.activeRoleIndex++;
+            renderTurn();
+        }
+
+        function forceNextPhase() {
+            if(GameContext.phase === 'night') {
+                resolveNight(); // Skip to Day
+            } else {
+                startNight(); // Skip to Night
+            }
         }
 
         // --- NIGHT LOOP ---
@@ -252,7 +268,7 @@
         function startDay(deathCount) {
             GameContext.phase = 'day'; updateDebugUI();
             
-            checkWinCondition(); // Check immediately after deaths
+            checkWinCondition(); 
 
             const alive = GameContext.players.filter(p => p.isAlive);
             let html = `<div class="text-center"><h2 class="text-2xl font-bold text-yellow-400">☀️ DAY ${GameContext.turn}</h2><p class="mb-4 text-gray-400">${deathCount} died.</p><h3 class="font-bold mb-2">Lynch Vote</h3><div class="grid grid-cols-2 gap-2">`;
@@ -274,7 +290,8 @@
             }
             
             checkWinCondition();
-            // Don't auto-start night if win detected, but allow user to click sleep if they want to continue
+            // Automatically continue to night (user can click phase skip if they want)
+            startNight();
         }
 
         // --- WIN CHECK ---
