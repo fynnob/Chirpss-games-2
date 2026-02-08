@@ -15,10 +15,13 @@
         .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: all 1s ease; z-index: 0; }
         .hidden { display: none !important; }
         
-        /* Compatibility for Scripts */
+        /* Modal Animation */
+        .modal-enter { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .modal-enter-active { opacity: 1; transform: scale(1); pointer-events: auto; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        /* Buttons */
         .btn { width: 100%; padding: 1rem; border-radius: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; margin-bottom: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; }
         .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
-        .btn-kill { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); border: none; }
         .btn-action { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none; }
     </style>
 </head>
@@ -60,6 +63,25 @@
 
     </main>
 
+    <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200">
+        <div class="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 text-center">
+            <h3 id="modal-title" class="text-xl font-black text-white mb-2">Title</h3>
+            <p id="modal-msg" class="text-gray-400 text-sm mb-6">Message goes here.</p>
+            <div id="modal-actions" class="flex gap-2 justify-center">
+                </div>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl modal-enter transition-all duration-500">
+        <div class="text-center max-w-md w-full">
+            <div id="go-icon" class="text-8xl mb-6 filter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">🏆</div>
+            <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Game Over</h2>
+            <h1 id="go-winner" class="text-5xl font-black text-white mb-4 leading-tight">WINNER</h1>
+            <p id="go-msg" class="text-lg text-gray-400 font-medium mb-12">The game has ended.</p>
+            <button onclick="window.location.href='index.html'" class="w-full py-4 bg-white text-slate-900 font-extrabold rounded-xl hover:bg-gray-200 uppercase tracking-widest">Return to Menu</button>
+        </div>
+    </div>
+
     <script>
         const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
         
@@ -76,7 +98,7 @@
         };
         
         window.RoleRegistry = {}; 
-        window.WinRegistry = {}; // New Registry
+        window.WinRegistry = {}; 
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -95,8 +117,10 @@
                 startNightPhase();
 
             } catch (err) {
-                alert("Game Error: " + err.message);
-                window.location.href = 'index.html';
+                console.error(err); // Log error instead of alert
+                showModal("Error", "Game failed to load data. Returning to menu.", () => {
+                    window.location.href = 'index.html';
+                });
             }
         });
 
@@ -114,14 +138,11 @@
 
         async function loadWinScripts() {
             const activeRoles = [...new Set(GameContext.players.map(p => p.role))];
-            
-            // Add Villager/Werewolf manual check just in case nobody selected them but they exist in deck
             if(!activeRoles.includes('Villager')) activeRoles.push('Villager');
             if(!activeRoles.includes('Werewolf')) activeRoles.push('Werewolf');
 
             const promises = activeRoles.map(r => {
                 const config = ROLES_DB[r];
-                // Check if this role introduces a new win condition script
                 if(config.winScript) {
                     return loadScript(`${CDN_BASE}/WinConditions/${config.winScript}`);
                 }
@@ -135,9 +156,62 @@
                 const s = document.createElement('script');
                 s.src = src;
                 s.onload = resolve;
-                s.onerror = resolve; // Ignore errors to keep game running
+                s.onerror = resolve; 
                 document.head.appendChild(s);
             });
+        }
+
+        // --- MODAL SYSTEM (NO MORE ALERTS) ---
+        function showModal(title, msg, onConfirm, onCancel = null) {
+            const modal = document.getElementById('custom-modal');
+            const titleEl = document.getElementById('modal-title');
+            const msgEl = document.getElementById('modal-msg');
+            const actions = document.getElementById('modal-actions');
+
+            titleEl.innerText = title;
+            msgEl.innerText = msg;
+            actions.innerHTML = '';
+
+            if (onCancel) {
+                // Two buttons (Confirm/Cancel)
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = "flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-400 font-bold rounded-xl transition-all uppercase tracking-widest text-xs";
+                cancelBtn.innerText = "Cancel";
+                cancelBtn.onclick = () => { closeModal(); onCancel(); };
+                actions.appendChild(cancelBtn);
+
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = "flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all uppercase tracking-widest text-xs";
+                confirmBtn.innerText = "Confirm";
+                confirmBtn.onclick = () => { closeModal(); onConfirm(); };
+                actions.appendChild(confirmBtn);
+            } else {
+                // One button (OK)
+                const okBtn = document.createElement('button');
+                okBtn.className = "w-full py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-gray-200 uppercase tracking-widest text-xs";
+                okBtn.innerText = "OK";
+                okBtn.onclick = () => { closeModal(); if(onConfirm) onConfirm(); };
+                actions.appendChild(okBtn);
+            }
+
+            modal.classList.remove('modal-enter');
+            modal.classList.add('modal-enter-active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('custom-modal');
+            modal.classList.remove('modal-enter-active');
+            modal.classList.add('modal-enter');
+        }
+
+        function showGameOver(title, msg, colorClass) {
+            const modal = document.getElementById('game-over-modal');
+            document.getElementById('go-winner').innerText = title;
+            document.getElementById('go-winner').className = `text-5xl font-black mb-4 leading-tight ${colorClass}`;
+            document.getElementById('go-msg').innerText = msg;
+            
+            modal.classList.remove('modal-enter');
+            modal.classList.add('modal-enter-active');
         }
 
         // --- NIGHT ENGINE ---
@@ -286,50 +360,73 @@
 
         window.lynch = function(id) {
             const p = GameContext.players.find(x => x.id === id);
-            if(!confirm(`Are you sure you want to vote out ${p.name}?`)) return;
             
-            p.isAlive = false;
-            GameContext.lynchedId = id; // IMPORTANT: For Jester check
-            
-            alert(`${p.name} was executed.\nThey were: ${p.role}`);
-            
-            // Resolve Lover chain for Day deaths too
-            if(GameContext.links.length === 2) {
-                const [l1, l2] = GameContext.links;
-                if(l1 === id) { 
-                    const p2 = GameContext.players.find(x => x.id === l2);
-                    if(p2 && p2.isAlive) { p2.isAlive = false; alert(`${p2.name} died of a broken heart!`); }
-                }
-                if(l2 === id) {
-                    const p1 = GameContext.players.find(x => x.id === l1);
-                    if(p1 && p1.isAlive) { p1.isAlive = false; alert(`${p1.name} died of a broken heart!`); }
-                }
-            }
-
+            // Replaced Browser Confirm with Custom Modal
+            showModal(
+                "Cast Vote?", 
+                `Are you sure you want to eliminate ${p.name}?`,
+                () => {
+                    // ON CONFIRM
+                    p.isAlive = false;
+                    GameContext.lynchedId = id;
+                    
+                    // Show Result via Modal, THEN continue
+                    showModal(
+                        "Execution Complete",
+                        `${p.name} was voted out.\nThey were: ${p.role}`,
+                        () => {
+                            // After they click "OK" on the death report...
+                            
+                            // Check Lovers Day Death
+                            if(GameContext.links.length === 2) {
+                                const [l1, l2] = GameContext.links;
+                                let brokenHeartName = null;
+                                if(l1 === id) { 
+                                    const p2 = GameContext.players.find(x => x.id === l2);
+                                    if(p2 && p2.isAlive) { p2.isAlive = false; brokenHeartName = p2.name; }
+                                }
+                                if(l2 === id) {
+                                    const p1 = GameContext.players.find(x => x.id === l1);
+                                    if(p1 && p1.isAlive) { p1.isAlive = false; brokenHeartName = p1.name; }
+                                }
+                                
+                                if(brokenHeartName) {
+                                    showModal("Heartbreak", `${brokenHeartName} died of a broken heart!`, () => {
+                                        finalizeDay();
+                                    });
+                                    return;
+                                }
+                            }
+                            
+                            finalizeDay();
+                        }
+                    );
+                },
+                () => { /* On Cancel - Do nothing */ }
+            );
+        };
+        
+        function finalizeDay() {
             if(!checkWin()) {
                 startNightPhase();
             }
-        };
+        }
 
-        // --- NEW MODULAR WIN CHECKER ---
+        // --- WIN CHECKER ---
         function checkWin() {
             let potentialWins = [];
 
-            // Run every registered win script
             Object.values(window.WinRegistry).forEach(checkFunc => {
                 const result = checkFunc(GameContext);
                 if (result) potentialWins.push(result);
             });
 
             if (potentialWins.length > 0) {
-                // Sort by priority (Higher number = More important)
                 potentialWins.sort((a, b) => b.priority - a.priority);
-                
-                // Pick the highest priority win
                 const finalWin = potentialWins[0];
                 
-                alert(finalWin.message);
-                window.location.href = 'index.html';
+                // Use Custom Game Over Screen
+                showGameOver(finalWin.winner + " Wins!", finalWin.message, finalWin.color);
                 return true;
             }
             return false;
