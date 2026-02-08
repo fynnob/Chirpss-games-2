@@ -9,91 +9,109 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        body { font-family: 'JetBrains Mono', monospace; background-color: #0f172a; color: #a5b4fc; }
+        body { font-family: 'JetBrains Mono', monospace; background-color: #0f172a; color: #a5b4fc; height: 100vh; overflow: hidden; }
         
         /* Debug Grid Layout */
-        .debug-grid { display: grid; grid-template-columns: 250px 1fr 300px; height: 100vh; gap: 1px; background: #334155; }
-        .panel { background: #0f172a; padding: 1rem; overflow-y: auto; }
+        .debug-grid { display: grid; grid-template-columns: 300px 1fr 300px; height: 100%; gap: 1px; background: #334155; }
+        .panel { background: #0f172a; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; }
         
         /* Components */
         .player-row { padding: 0.5rem; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
         .player-row.dead { opacity: 0.5; text-decoration: line-through; color: #ef4444; }
-        .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
-        .tag-wolf { background: #ef4444; color: black; }
-        .tag-good { background: #4ade80; color: black; }
-        .tag-neutral { background: #e2e8f0; color: black; }
         
-        .log-entry { margin-bottom: 0.5rem; font-size: 0.8rem; border-left: 2px solid #6366f1; padding-left: 0.5rem; }
+        .tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .tag-wolf { background: #7f1d1d; color: #fca5a5; }
+        .tag-good { background: #14532d; color: #86efac; }
+        .tag-neutral { background: #334155; color: #cbd5e1; }
+        
+        .log-entry { margin-bottom: 0.25rem; font-size: 0.75rem; border-left: 2px solid #6366f1; padding-left: 0.5rem; word-wrap: break-word; }
         .log-error { border-left-color: #ef4444; color: #fca5a5; }
         .log-success { border-left-color: #4ade80; color: #86efac; }
 
-        .btn-debug { width: 100%; text-align: left; padding: 0.5rem; background: #1e293b; margin-bottom: 0.25rem; border: 1px solid #334155; color: white; cursor: pointer; }
+        /* Buttons */
+        .btn-debug { width: 100%; text-align: left; padding: 0.5rem; background: #1e293b; margin-bottom: 0.25rem; border: 1px solid #334155; color: white; cursor: pointer; transition: 0.2s; }
         .btn-debug:hover { background: #334155; }
-        .btn-action { background: #4f46e5; border-color: #6366f1; text-align: center; font-weight: bold; }
         
-        /* Mocking the Game.html Styles for the script rendering */
+        .btn-role-add { padding: 4px 8px; font-size: 0.75rem; border: 1px solid #334155; margin: 2px; display: inline-block; cursor: pointer; }
+        .btn-role-add:hover { background: #334155; }
+
+        /* Mock Container */
         #game-mock-container {
             background: #1e293b; border-radius: 1rem; padding: 2rem;
-            max-width: 500px; margin: 2rem auto; border: 1px solid #475569;
+            width: 100%; max-width: 500px; margin: 2rem auto; border: 1px solid #475569;
+            min-height: 300px;
         }
-        /* Compatibility classes for roles */
-        .btn { display: block; width: 100%; padding: 10px; margin-bottom: 5px; background: #334155; color: white; border-radius: 5px; }
-        .btn-kill { background: #7f1d1d; }
+        
+        /* Simulated Game CSS */
+        .btn { display: block; width: 100%; padding: 12px; margin-bottom: 8px; background: #334155; color: white; border-radius: 8px; font-weight: bold; text-align: center; }
+        .btn:hover { background: #475569; }
         .hidden { display: none; }
     </style>
 </head>
 <body class="debug-grid">
 
-    <div class="panel flex flex-col">
-        <h2 class="text-xl font-bold text-white mb-4">SETUP</h2>
+    <div class="panel">
+        <h2 class="text-lg font-bold text-white mb-2">BUILDER</h2>
         
-        <div class="mb-4">
-            <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Quick Spawn</h3>
-            <button onclick="quickSpawn(['Werewolf', 'Seer', 'Villager'])" class="btn-debug">3P: Wolf/Seer/Vil</button>
-            <button onclick="quickSpawn(['Werewolf', 'Doctor', 'Seer', 'Villager'])" class="btn-debug">4P: Classic</button>
-            <button onclick="quickSpawn(['Werewolf', 'Witch', 'Serial Killer', 'Cupid', 'Villager'])" class="btn-debug">5P: Chaos Mode</button>
-        </div>
-
-        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Player State</h3>
-        <div id="player-list" class="flex-grow mb-4 text-sm"></div>
-
-        <div class="border-t border-gray-700 pt-4">
-             <button onclick="resetGame()" class="btn-debug text-red-400">RESET ENGINE</button>
-        </div>
-    </div>
-
-    <div class="panel flex flex-col items-center bg-gray-900 relative">
-        <div class="absolute top-4 left-4 text-xs font-bold bg-black/50 px-2 py-1 rounded">
-            PHASE: <span id="phase-display" class="text-white">INIT</span>
-        </div>
-        
-        <div id="game-mock-container" class="w-full">
-            <div class="text-center text-gray-500 py-10">
-                Waiting for game start...
+        <div class="mb-4 bg-slate-900 p-2 rounded border border-slate-800">
+            <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Available Roles</h3>
+            <div id="role-selector" class="flex flex-wrap gap-1 mb-2">
+                </div>
+            
+            <h3 class="text-xs font-bold uppercase mb-1 text-gray-500">Current Deck (<span id="deck-count">0</span>)</h3>
+            <div id="custom-deck-list" class="flex flex-wrap gap-1 mb-2 min-h-[30px] p-1 bg-black/20 rounded"></div>
+            
+            <div class="flex gap-1">
+                <button onclick="spawnCustomGame()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 rounded">START CUSTOM</button>
+                <button onclick="clearDeck()" class="px-3 bg-red-900/50 hover:bg-red-800 text-red-300 text-xs font-bold rounded">CLR</button>
             </div>
         </div>
 
-        <div class="mt-8 flex gap-2 w-full max-w-md">
-            <button onclick="forceNextTurn()" class="flex-1 btn-debug btn-action">FORCE NEXT TURN</button>
-            <button onclick="resolveNight()" class="flex-1 btn-debug btn-action bg-yellow-600 border-yellow-500">SKIP TO DAY</button>
+        <div class="mb-4">
+            <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Presets</h3>
+            <button onclick="quickSpawn(['Werewolf', 'Seer', 'Villager'])" class="btn-debug text-xs">3P: Wolf/Seer/Vil</button>
+            <button onclick="quickSpawn(['Werewolf', 'Doctor', 'Seer', 'Villager'])" class="btn-debug text-xs">4P: Classic</button>
+            <button onclick="quickSpawn(['Werewolf', 'Witch', 'Serial Killer', 'Cupid', 'Villager'])" class="btn-debug text-xs">5P: Chaos Mode</button>
+        </div>
+
+        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500 border-t border-slate-700 pt-2">Live Players</h3>
+        <div id="player-list" class="flex-grow overflow-y-auto text-sm"></div>
+    </div>
+
+    <div class="panel flex items-center justify-center bg-gray-950 relative p-0">
+        <div class="absolute top-0 left-0 w-full p-2 flex justify-between items-center bg-slate-900 border-b border-slate-800 z-10">
+            <div class="text-xs font-bold bg-black/50 px-2 py-1 rounded">
+                PHASE: <span id="phase-display" class="text-white">INIT</span>
+            </div>
+            <div class="text-xs font-bold bg-black/50 px-2 py-1 rounded">
+                TURN: <span id="turn-display" class="text-white">0</span>
+            </div>
+        </div>
+
+        <div id="game-mock-container">
+            <div class="text-center text-gray-500 py-10">Select roles to start...</div>
         </div>
     </div>
 
     <div class="panel">
-        <h2 class="text-xl font-bold text-white mb-4">CONSOLE</h2>
-        <div id="console-log" class="font-mono text-xs h-[60vh] overflow-y-auto mb-4"></div>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-white">CONSOLE</h2>
+            <button onclick="clearConsole()" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded">CLEAR</button>
+        </div>
         
-        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Live Data</h3>
-        <pre id="data-dump" class="text-[10px] text-gray-400 overflow-x-auto"></pre>
+        <div id="console-log" class="flex-grow font-mono overflow-y-auto mb-4 bg-black/20 p-2 rounded"></div>
         
-        <button onclick="checkWinCondition()" class="btn-debug mt-4 border-green-800 text-green-400">CHECK WIN CONDITION</button>
+        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">State Dump</h3>
+        <pre id="data-dump" class="text-[10px] text-gray-400 overflow-x-auto bg-black/20 p-2 rounded max-h-32"></pre>
+        
+        <button onclick="checkWinCondition()" class="btn-debug mt-4 border-green-800 text-green-400 text-center text-xs">CHECK WIN CONDITION</button>
     </div>
 
     <script>
         const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
         let ROLES_DB = {};
+        let customDeck = [];
         
-        // Mocking the Game Engine
         let GameContext = {
             players: [],
             phase: 'setup',
@@ -106,43 +124,96 @@
         window.RoleRegistry = {};
 
         // --- INIT ---
-        async function loadDB() {
+        async function init() {
             log("Fetching roles.json...", "neutral");
             try {
                 const res = await fetch(`${CDN_BASE}/Data/roles.json`);
                 const data = await res.json();
                 ROLES_DB = data.roles;
+                renderBuilder();
                 log("Database Loaded.", "success");
             } catch(e) {
-                log("Failed to load DB: " + e.message, "error");
+                log("DB Error: " + e.message, "error");
             }
         }
-        loadDB();
+        init();
 
-        // --- SETUP ---
-        async function quickSpawn(roleList) {
-            log(`Spawning game with: ${roleList.join(', ')}`);
+        // --- BUILDER UI ---
+        function renderBuilder() {
+            const container = document.getElementById('role-selector');
+            container.innerHTML = '';
             
+            Object.keys(ROLES_DB).forEach(key => {
+                const role = ROLES_DB[key];
+                const btn = document.createElement('div');
+                
+                let colorClass = 'text-gray-300 border-gray-600';
+                if(role.team === 'Werewolf') colorClass = 'text-red-300 border-red-800 bg-red-900/20';
+                else if(role.team === 'Village') colorClass = 'text-green-300 border-green-800 bg-green-900/20';
+                
+                btn.className = `btn-role-add ${colorClass} rounded`;
+                btn.innerText = key;
+                btn.onclick = () => addToDeck(key);
+                container.appendChild(btn);
+            });
+        }
+
+        function addToDeck(role) {
+            customDeck.push(role);
+            renderDeck();
+        }
+
+        function clearDeck() {
+            customDeck = [];
+            renderDeck();
+        }
+
+        function renderDeck() {
+            const container = document.getElementById('custom-deck-list');
+            document.getElementById('deck-count').innerText = customDeck.length;
+            container.innerHTML = customDeck.map((r, i) => 
+                `<span onclick="customDeck.splice(${i},1); renderDeck()" class="cursor-pointer text-[10px] bg-slate-700 px-2 py-1 rounded hover:bg-red-900">${r}</span>`
+            ).join('');
+        }
+
+        function spawnCustomGame() {
+            if(customDeck.length < 1) return log("Deck empty!", "error");
+            quickSpawn(customDeck);
+        }
+
+        // --- GAME SPAWN ---
+        async function quickSpawn(roleList) {
+            GameContext = {
+                players: [],
+                phase: 'setup',
+                turn: 0,
+                nightActions: {},
+                activeRoleIndex: 0,
+                nightOrder: [],
+                links: []
+            };
+
+            log(`Spawning ${roleList.length} players...`);
+            
+            // Name logic: "Role #", e.g. "Werewolf 1", "Villager 4"
             GameContext.players = roleList.map((role, i) => ({
                 id: 'p' + i,
-                name: `Bot ${role} ${i+1}`,
+                name: `${role} ${i+1}`,
                 role: role,
                 team: ROLES_DB[role].team,
                 isAlive: true
             }));
 
-            // Load scripts dynamically
-            log("Loading Role Scripts...");
+            log("Loading Scripts...");
             const uniqueRoles = [...new Set(roleList)];
-            
             const promises = uniqueRoles.map(r => {
                 const config = ROLES_DB[r];
                 if(config.hasNightAction && config.script && !window.RoleRegistry[r]) {
                     return new Promise((resolve) => {
                         const s = document.createElement('script');
                         s.src = `${CDN_BASE}/Night/${config.script}`;
-                        s.onload = () => { log(`Loaded ${config.script}`, 'success'); resolve(); };
-                        s.onerror = () => { log(`Failed ${config.script}`, 'error'); resolve(); };
+                        s.onload = resolve;
+                        s.onerror = () => { log(`Missing script: ${config.script}`, 'error'); resolve(); };
                         document.head.appendChild(s);
                     });
                 }
@@ -150,11 +221,10 @@
             });
 
             await Promise.all(promises);
-            updateDebugUI();
             startNight();
         }
 
-        // --- ENGINE LOOP ---
+        // --- NIGHT LOOP ---
         function startNight() {
             GameContext.phase = 'night';
             GameContext.nightActions = {};
@@ -164,26 +234,21 @@
             GameContext.nightOrder = awake.sort((a,b) => ROLES_DB[a.role].priority - ROLES_DB[b.role].priority);
             GameContext.activeRoleIndex = 0;
             
-            log(`--- NIGHT ${GameContext.turn} STARTED ---`);
-            log(`Wake Order: ${GameContext.nightOrder.map(p => p.role).join(' -> ')}`);
-            
+            log(`=== NIGHT ${GameContext.turn} START ===`, "neutral");
             renderTurn();
         }
 
         function renderTurn() {
             updateDebugUI();
             
+            // End of Night -> Resolve
             if(GameContext.activeRoleIndex >= GameContext.nightOrder.length) {
-                document.getElementById('game-mock-container').innerHTML = `
-                    <div class="text-center">
-                        <h2 class="text-2xl font-bold text-white">Night Ended</h2>
-                        <p>Waiting to resolve...</p>
-                    </div>`;
+                resolveNight();
                 return;
             }
 
             const p = GameContext.nightOrder[GameContext.activeRoleIndex];
-            log(`Waking up: ${p.name} (${p.role})`);
+            log(`Turn: ${p.name}`);
             
             const container = document.getElementById('game-mock-container');
             container.innerHTML = '';
@@ -191,32 +256,22 @@
             if(window.RoleRegistry[p.role]) {
                 container.innerHTML = window.RoleRegistry[p.role].renderUI(GameContext, p);
             } else {
-                container.innerHTML = `<div class="text-red-500">Script missing for ${p.role}</div>`;
+                container.innerHTML = `<div class="text-center">No UI for ${p.role}. <br><button class="btn" onclick="finishTurn()">Skip</button></div>`;
             }
         }
 
-        function forceNextTurn() {
-            GameContext.activeRoleIndex++;
-            renderTurn();
-        }
-
-        // --- GLOBAL API MOCK ---
         window.finishTurn = function(data) {
             if(data) {
                 if(data.lovers) GameContext.links = data.lovers;
                 Object.assign(GameContext.nightActions, data);
-                log("Action Received: " + JSON.stringify(data), "success");
-            } else {
-                log("Player skipped action.");
+                log(`Action: ${JSON.stringify(data)}`);
             }
-            
-            forceNextTurn();
+            GameContext.activeRoleIndex++;
+            renderTurn();
         };
 
-        // --- RESOLUTION LOGIC (COPIED FROM GAME.HTML) ---
+        // --- RESOLUTION ---
         function resolveNight() {
-            log("RESOLVING NIGHT...", "neutral");
-            
             let confirmedDeaths = new Set();
             let protectionSet = new Set(); 
 
@@ -232,44 +287,78 @@
             if (skTarget && !protectionSet.has(skTarget)) confirmedDeaths.add(skTarget);
             if (witchKill) confirmedDeaths.add(witchKill);
 
-            // Lovers Logic
-            let newDeathAdded = true;
-            while(newDeathAdded) {
-                newDeathAdded = false;
-                if(GameContext.links && GameContext.links.length === 2) {
+            // Chain Reaction
+            let loop = true;
+            while(loop) {
+                loop = false;
+                if(GameContext.links.length === 2) {
                     const [p1, p2] = GameContext.links;
-                    if(confirmedDeaths.has(p1) && !confirmedDeaths.has(p2)) {
-                        confirmedDeaths.add(p2); newDeathAdded = true; log(`Chain reaction: ${p2} died of love.`);
-                    }
-                    if(confirmedDeaths.has(p2) && !confirmedDeaths.has(p1)) {
-                        confirmedDeaths.add(p1); newDeathAdded = true; log(`Chain reaction: ${p1} died of love.`);
-                    }
+                    if(confirmedDeaths.has(p1) && !confirmedDeaths.has(p2)) { confirmedDeaths.add(p2); loop=true; }
+                    if(confirmedDeaths.has(p2) && !confirmedDeaths.has(p1)) { confirmedDeaths.add(p1); loop=true; }
                 }
             }
 
-            // Apply Deaths
             confirmedDeaths.forEach(id => {
                 const p = GameContext.players.find(pl => pl.id === id);
-                if(p) {
-                    p.isAlive = false;
-                    log(`DIED: ${p.name} (${p.role})`, "error");
-                }
+                if(p) { p.isAlive = false; log(`☠️ DIED: ${p.name}`, "error"); }
             });
 
+            startDay(confirmedDeaths.size);
+        }
+
+        // --- DAY LOOP (VOTING) ---
+        function startDay(deathCount) {
             GameContext.phase = 'day';
             updateDebugUI();
             
             const container = document.getElementById('game-mock-container');
-            container.innerHTML = `<div class="text-center"><h1 class="text-3xl">☀️ DAY BREAK</h1><p>${confirmedDeaths.size} deaths.</p></div>`;
+            
+            // Build Voting UI
+            const alive = GameContext.players.filter(p => p.isAlive);
+            
+            let html = `
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-yellow-400">☀️ DAY ${GameContext.turn}</h2>
+                    <p class="mb-4 text-gray-400">${deathCount} died last night.</p>
+                    <h3 class="font-bold mb-2">Who to Lynch?</h3>
+                    <div class="grid grid-cols-2 gap-2">
+            `;
+            
+            html += alive.map(p => 
+                `<button onclick="mockLynch('${p.id}')" class="bg-slate-700 p-2 rounded hover:bg-red-900/50 border border-slate-600">${p.name}</button>`
+            ).join('');
+            
+            html += `</div>
+                <button onclick="startNight()" class="mt-4 w-full py-2 bg-blue-900 hover:bg-blue-800 text-white rounded font-bold">NO ONE / SLEEP</button>
+            </div>`;
+            
+            container.innerHTML = html;
+            
+            checkWinCondition();
         }
 
+        function mockLynch(id) {
+            const p = GameContext.players.find(pl => pl.id === id);
+            p.isAlive = false;
+            log(`⚖️ LYNCHED: ${p.name}`, "error");
+            
+            // Jester Check
+            if(p.role === 'Jester') {
+                log("🤡 JESTER WINS!", "success");
+                return alert("JESTER WINS!");
+            }
+            
+            if(!checkWinCondition()) {
+                startNight();
+            }
+        }
+
+        // --- UTILS ---
         function checkWinCondition() {
             const alive = GameContext.players.filter(p => p.isAlive);
             const wolves = alive.filter(p => p.team === 'Werewolf').length;
             const goods = alive.filter(p => p.team === 'Village').length;
             const sk = alive.find(p => p.role === 'Serial Killer');
-
-            log(`WIN CHECK: Wolves: ${wolves}, Good: ${goods}, SK: ${!!sk}`);
 
             if(alive.length === 1 && sk) return log(">> SERIAL KILLER WINS", "success");
             if(wolves === 0 && !sk) return log(">> VILLAGE WINS", "success");
@@ -278,42 +367,37 @@
                  const [l1, l2] = GameContext.links;
                  if(alive.find(p => p.id === l1) && alive.find(p => p.id === l2)) return log(">> LOVERS WIN", "success");
             }
-            
-            log(">> GAME CONTINUES");
+            return false;
         }
 
-        // --- UI UTILS ---
         function log(msg, type="") {
             const div = document.createElement('div');
             div.className = `log-entry log-${type}`;
-            div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            div.innerText = msg;
             document.getElementById('console-log').prepend(div);
+        }
+        
+        function clearConsole() {
+            document.getElementById('console-log').innerHTML = '';
         }
 
         function updateDebugUI() {
             document.getElementById('phase-display').innerText = GameContext.phase.toUpperCase();
+            document.getElementById('turn-display').innerText = GameContext.turn;
+            document.getElementById('data-dump').innerText = JSON.stringify(GameContext.nightActions, null, 2);
             
             const list = document.getElementById('player-list');
             list.innerHTML = GameContext.players.map(p => {
                 let teamClass = p.team === 'Werewolf' ? 'tag-wolf' : (p.team === 'Village' ? 'tag-good' : 'tag-neutral');
                 return `
                 <div class="player-row ${!p.isAlive ? 'dead' : ''}">
-                    <div>
-                        <span class="font-bold">${p.name}</span>
-                        <div class="text-xs text-gray-500">ID: ${p.id}</div>
-                    </div>
+                    <div><span class="font-bold">${p.name}</span></div>
                     <div class="text-right">
                         <span class="tag ${teamClass}">${p.role}</span>
                         ${GameContext.links.includes(p.id) ? '❤️' : ''}
                     </div>
                 </div>`;
             }).join('');
-
-            document.getElementById('data-dump').innerText = JSON.stringify(GameContext.nightActions, null, 2);
-        }
-
-        function resetGame() {
-            location.reload();
         }
     </script>
 </body>
