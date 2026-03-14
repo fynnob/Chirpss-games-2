@@ -93,7 +93,7 @@
 <div class="drag-hint text-red-500/50 text-2xl drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]">▲</div>
 </div>
 </div>
-<button class="w-full max-w-xs py-4 bg-gray-900 border border-red-900/30 shadow-[0_0_15px_rgba(220,38,38,0.1)] text-gray-600 font-bold rounded-xl transition-all uppercase tracking-widest text-sm" disabled="" id="next-btn" onclick="confirmAndNext()">
+<button class="w-full max-w-xs py-4 bg-gray-900 border border-red-900/30 shadow-[0_0_15px_rgba(220,38,38,0.1)] text-gray-600 font-bold rounded-xl transition-all uppercase tracking-widest text-sm active:scale-95 transition-transform" disabled="" id="next-btn" onclick="confirmAndNext()">
             Slide Up First
         </button>
 </main>
@@ -235,7 +235,7 @@
             btn.disabled = false;
             const isLast = currentIndex >= playersQueue.length - 1;
             
-            btn.className = "w-full max-w-xs py-4 bg-gradient-to-r from-red-900 to-red-600 text-white font-black rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] border border-red-500/30 hover:scale-[1.02] transition-all uppercase tracking-widest text-sm";
+            btn.className = "w-full max-w-xs py-4 bg-gradient-to-r from-red-900 to-red-600 text-white font-black rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] border border-red-500/30  transition-all uppercase tracking-widest text-sm";
             btn.innerText = isLast ? "START GAME" : "CONFIRM & HIDE";
         }
 
