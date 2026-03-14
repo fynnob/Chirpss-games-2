@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chirpss - Offline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+        .box { text-align: center; padding: 2rem; background: #1e293b; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        button { margin-top: 1rem; padding: 0.75rem 1.5rem; background: #F97316; border: none; border-radius: 9999px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1 style="font-size: 2rem; margin-bottom: 0.5rem; font-weight: 800;">No Connection</h1>
+        <p style="color: #94A3B8;">Please check your Wi-Fi or cellular data.</p>
+        <button onclick="window.location.reload()">Try Again</button>
+    </div>
+</body>
+</html>

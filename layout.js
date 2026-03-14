@@ -109,3 +109,22 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('ServiceWorker registration failed: ', err));
     });
 }
+
+// App CSS to make it feel native
+    const style = document.createElement('style');
+    style.id = 'native-app-styles';
+    style.innerHTML = `
+        body {
+            overscroll-behavior-y: none; /* Disables pull-to-refresh */
+            -webkit-tap-highlight-color: transparent; /* Removes blue tap shadow */
+            -webkit-touch-callout: none; /* Disables long-press context menu */
+            user-select: none; /* Disables text selection */
+            -webkit-user-select: none;
+        }
+        input, textarea {
+            user-select: auto;
+            -webkit-user-select: auto;
+        }
+    `;
+    document.head.appendChild(style);
+}
