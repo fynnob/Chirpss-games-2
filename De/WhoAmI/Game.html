@@ -188,7 +188,7 @@ html
                    if(endBtn) endBtn.classList.remove('hidden');
                 }, 1000);
 
-                const joinUrl = `https://gc.fynn.qzz.io/En/Beitreten/?code=${code}`;
+                const joinUrl = `https://gc.fynn.qzz.io/De/Beitreten/?code=${code}`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(joinUrl)}`;
                 document.getElementById('qr-area').innerHTML = `<img src="${qrUrl}" alt="QR">`;
 
