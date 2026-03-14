@@ -34,7 +34,7 @@
             </div>
 
             <div class="bg-card-bg/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
-                <p class="text-[10px] font-bold text-subtle-gray uppercase tracking-[0.2em] mb-2">Active Player</p>
+                <p class="text-[10px] font-bold text-subtle-gray uppercase tracking-[0.2em] mb-2">Active Spielener</p>
                 <h3 id="current-player" class="text-4xl font-black text-pink-500">---</h3>
             </div>
 
@@ -44,7 +44,7 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="playerEliminated(false)" class="py-5 bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-900/40 active:scale-95 transition-all">FAILED</button>
-                <button onclick="rotatePlayer()" class="py-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-2xl shadow-lg shadow-pink-500/20 active:scale-95 transition-all">WRONG ANSWER</button>
+                <button onclick="rotateSpielener()" class="py-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-2xl shadow-lg shadow-pink-500/20 active:scale-95 transition-all">WRONG ANSWER</button>
             </div>
         </div>
 
@@ -63,20 +63,20 @@
 
     <script>
         let gameData = JSON.parse(sessionStorage.getItem('wao_game_data'));
-        let activePlayers = [...gameData.players].sort(() => Math.random() - 0.5);
-        let eliminatedPlayers = [];
+        let activeSpieleners = [...gameData.players].sort(() => Math.random() - 0.5);
+        let eliminatedSpieleners = [];
         let prompts = [...gameData.prompts].sort(() => Math.random() - 0.5);
         let totalTimeLimit = gameData.timePerQuestion * 1000;
         let timeRemaining;
         let timerInterval;
         let currentIndex = 0;
 
-        function rotatePlayer() {
+        function rotateSpielener() {
             clearInterval(timerInterval);
-            if(activePlayers.length <= 1) { endGame(); return; }
-            currentIndex = (currentIndex + 1) % activePlayers.length;
+            if(activeSpieleners.length <= 1) { endGame(); return; }
+            currentIndex = (currentIndex + 1) % activeSpieleners.length;
             const prompt = prompts.pop() || "No more prompts!";
-            document.getElementById('current-player').textContent = activePlayers[currentIndex].toUpperCase();
+            document.getElementById('current-player').textContent = activeSpieleners[currentIndex].toUpperCase();
             document.getElementById('question-area').querySelector('p').textContent = `"${prompt}"`;
             document.getElementById('question-area').querySelector('p').classList.remove('text-rose-500');
             startTimer();
@@ -102,25 +102,25 @@
 
         function playerEliminated(timedOut) {
             clearInterval(timerInterval);
-            const fallen = activePlayers.splice(currentIndex, 1)[0];
-            eliminatedPlayers.push(fallen);
+            const fallen = activeSpieleners.splice(currentIndex, 1)[0];
+            eliminatedSpieleners.push(fallen);
             document.getElementById('question-area').querySelector('p').textContent = timedOut ? "TIME'S UP!" : "ELIMINATED";
             document.getElementById('question-area').querySelector('p').classList.add('text-rose-500');
             updateVisual(0);
-            if(activePlayers.length <= 1) { setTimeout(endGame, 1500); }
-            else { currentIndex = currentIndex % activePlayers.length; setTimeout(rotatePlayer, 1500); }
+            if(activeSpieleners.length <= 1) { setTimeout(endGame, 1500); }
+            else { currentIndex = currentIndex % activeSpieleners.length; setTimeout(rotateSpielener, 1500); }
         }
 
         function endGame() {
             document.getElementById('game-state').classList.add('hidden');
             document.getElementById('final-results-state').classList.remove('hidden');
-            document.getElementById('winner-name').textContent = activePlayers[0] || "NONE";
-            document.getElementById('eliminated-players').innerHTML = eliminatedPlayers.reverse().map(p => `<li>${p}</li>`).join('');
+            document.getElementById('winner-name').textContent = activeSpieleners[0] || "NONE";
+            document.getElementById('eliminated-players').innerHTML = eliminatedSpieleners.reverse().map(p => `<li>${p}</li>`).join('');
         }
 
         document.addEventListener('DOMContentLoaded', () => { 
             if(!gameData) location.href = './index.html';
-            rotatePlayer(); 
+            rotateSpielener(); 
         });
     </script>
 </body>

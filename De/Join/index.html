@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Join Game</title>
+    <title>CHIRPSS | Beitreten Game</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,7 +49,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
                 </div>
-                <h1 class="text-3xl font-extrabold text-white mb-2">Join Game</h1>
+                <h1 class="text-3xl font-extrabold text-white mb-2">Beitreten Game</h1>
                 <p class="text-subtle-gray text-sm font-medium">Enter your 4-digit room code to play</p>
             </div>
 
@@ -60,7 +60,7 @@
                 </div>
                 
                 <button onclick="joinGame()" id="join-btn" class="w-full py-5 bg-gradient-to-r from-warm-dusk to-fiery-core text-white font-black text-xl rounded-2xl shadow-lg shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                    Join Room
+                    Beitreten Room
                 </button>
                 
                 <div id="error-container" class="min-h-[24px] text-center">
@@ -138,7 +138,7 @@
                 showError(e.message === "Room not found" ? "This room doesn't exist" : "Connection error");
                 
                 // Reset Button
-                btn.textContent = "Join Room";
+                btn.textContent = "Beitreten Room";
                 btn.disabled = false;
             }
         }

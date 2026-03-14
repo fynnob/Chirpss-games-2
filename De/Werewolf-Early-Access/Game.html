@@ -200,15 +200,15 @@
                 // Attacks
                 // 1. Guard Dog Logic
                 if (na.wolfTarget) {
-                    const targetPlayer = GameContext.players.find(pl => pl.id === na.wolfTarget);
-                    if (targetPlayer && targetPlayer.role === 'Guard Dog') {
+                    const targetSpielener = GameContext.players.find(pl => pl.id === na.wolfTarget);
+                    if (targetSpielener && targetSpielener.role === 'Guard Dog') {
                         // Guard Dog survives, Random Wolf dies
                         const wolves = GameContext.players.filter(pl => pl.team === 'Werewolf' && pl.isAlive);
                         if(wolves.length > 0) {
                             const deadWolf = wolves[Math.floor(Math.random() * wolves.length)];
                             confirmedDeaths.add(deadWolf.id);
                         }
-                        targetPlayer.role = 'Villager'; // Converts
+                        targetSpielener.role = 'Villager'; // Converts
                     } else {
                         // Standard Wolf Attack
                         let isProtected = protectionSet.has(na.wolfTarget) || protectionSet.has(na.wolfTarget + "_wolfonly");

@@ -49,7 +49,7 @@
             </div>
 
             <div class="bg-slate-900/80 border border-red-500/20 p-8 rounded-[2rem] backdrop-blur-xl shadow-2xl">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Active Player</p>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Active Spielener</p>
                 <h3 id="current-player" class="text-4xl font-black text-white mb-8">---</h3>
                 
                 <div id="question-area" class="min-h-[120px] flex items-center justify-center border-t border-white/5 pt-6">
@@ -77,8 +77,8 @@
 
     <script>
         let gameData = JSON.parse(sessionStorage.getItem('shortfuse_game_data'));
-        let activePlayers = [...gameData.players].sort(() => Math.random() - 0.5);
-        let eliminatedPlayers = [];
+        let activeSpieleners = [...gameData.players].sort(() => Math.random() - 0.5);
+        let eliminatedSpieleners = [];
         let prompts = [...gameData.prompts].sort(() => Math.random() - 0.5);
         let totalTimeLimit = gameData.timePerQuestion * 1000;
         
@@ -88,7 +88,7 @@
         let currentIndex = 0;
         let currentPrompt = "";
 
-        // Start the game logic
+        // Starten the game logic
         document.addEventListener('DOMContentLoaded', () => { 
             if(!gameData) location.href = './index.html';
             startNewRound(); 
@@ -96,7 +96,7 @@
 
         // Called when game starts OR after an elimination (Survivors need a new topic)
         function startNewRound() {
-            if(activePlayers.length <= 1) { endGame(); return; }
+            if(activeSpieleners.length <= 1) { endGame(); return; }
             
             // 1. Pick new category
             currentPrompt = prompts.pop() || "No more categories!";
@@ -128,7 +128,7 @@
                     clearInterval(prepInterval);
                     overlay.classList.add('hidden');
                     gameUi.classList.remove('hidden');
-                    // Start the first turn of the round
+                    // Starten the first turn of the round
                     updateGameUI();
                     startTimer();
                 }
@@ -137,7 +137,7 @@
 
         function updateGameUI() {
             // Update Text
-            document.getElementById('current-player').textContent = activePlayers[currentIndex].toUpperCase();
+            document.getElementById('current-player').textContent = activeSpieleners[currentIndex].toUpperCase();
             document.getElementById('question-area').querySelector('p').textContent = currentPrompt;
             document.getElementById('question-area').querySelector('p').classList.remove('text-slate-500'); // Reset color if it was "Exploded"
             document.getElementById('question-area').querySelector('p').classList.add('text-white');
@@ -153,7 +153,7 @@
             clearInterval(timerInterval);
             
             // Move to next player
-            currentIndex = (currentIndex + 1) % activePlayers.length;
+            currentIndex = (currentIndex + 1) % activeSpieleners.length;
             
             updateGameUI();
             startTimer();
@@ -201,17 +201,17 @@
             document.getElementById('question-area').querySelector('p').classList.remove('text-white');
             document.getElementById('question-area').querySelector('p').classList.add('text-red-600');
 
-            // Remove Player logic
-            const fallen = activePlayers.splice(currentIndex, 1)[0];
-            eliminatedPlayers.push(fallen);
+            // Remove Spielener logic
+            const fallen = activeSpieleners.splice(currentIndex, 1)[0];
+            eliminatedSpieleners.push(fallen);
 
             // Wait 2 seconds then start next round (or end game)
             setTimeout(() => {
-                if(activePlayers.length <= 1) { 
+                if(activeSpieleners.length <= 1) { 
                     endGame(); 
                 } else { 
                     // Reset index to ensure it's valid
-                    currentIndex = currentIndex % activePlayers.length;
+                    currentIndex = currentIndex % activeSpieleners.length;
                     startNewRound(); // Pick new category + Prep
                 }
             }, 2500);
@@ -220,8 +220,8 @@
         function endGame() {
             document.getElementById('game-state').classList.add('hidden');
             document.getElementById('final-results-state').classList.remove('hidden');
-            document.getElementById('winner-name').textContent = activePlayers[0] || "NOBODY";
-            document.getElementById('eliminated-players').innerHTML = eliminatedPlayers.reverse().map(p => `<li>${p}</li>`).join('');
+            document.getElementById('winner-name').textContent = activeSpieleners[0] || "NOBODY";
+            document.getElementById('eliminated-players').innerHTML = eliminatedSpieleners.reverse().map(p => `<li>${p}</li>`).join('');
         }
     </script>
 </body>

@@ -29,7 +29,7 @@
         }
         #card-front:active { cursor: grabbing; }
 
-        /* Back of Card (The Role) */
+        /* Zurück of Card (The Role) */
         #card-back { 
             background: #1e293b; 
             border: 2px solid rgba(255,255,255,0.1); 
@@ -102,7 +102,7 @@
         let isRevealed = false;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Load Players
+            // 1. Load Spieleners
             const payload = sessionStorage.getItem('werewolf_payload');
             if(!payload) return window.location.href = 'index.html';
             playersQueue = JSON.parse(payload);
@@ -121,11 +121,11 @@
             // 3. Attach Drag Events
             const front = document.getElementById('card-front');
             
-            front.addEventListener('mousedown', dragStart);
+            front.addEventListener('mousedown', dragStarten);
             window.addEventListener('mousemove', dragMove);
             window.addEventListener('mouseup', dragEnd);
             
-            front.addEventListener('touchstart', (e) => dragStart(e.touches[0]));
+            front.addEventListener('touchstart', (e) => dragStarten(e.touches[0]));
             window.addEventListener('touchmove', (e) => dragMove(e.touches[0]));
             window.addEventListener('touchend', dragEnd);
         });
@@ -143,7 +143,7 @@
             const player = playersQueue[currentIndex];
             document.getElementById('current-player-name').innerText = player.name;
             
-            // Update Back Card Content
+            // Update Zurück Card Content
             const roleData = rolesDB[player.role];
             
             document.getElementById('role-icon').innerText = roleData.emoji || '🎲';
@@ -179,7 +179,7 @@
         }
 
         // --- DRAG HANDLERS ---
-        function dragStart(e) {
+        function dragStarten(e) {
             isDragging = true;
             startY = e.clientY;
             document.getElementById('card-front').style.transition = 'none';

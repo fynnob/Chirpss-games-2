@@ -120,7 +120,7 @@
                 sBtn.className = "flex-1 py-3 rounded-lg font-bold text-subtle-gray hover:bg-white/5 transition-all";
                 mBtn.className = "flex-1 py-3 rounded-lg font-bold text-white bg-blue-500 shadow-lg transition-all";
             }
-            updateStartButton();
+            updateStartenButton();
         }
 
         function renderCategories() {
@@ -141,10 +141,10 @@
                 selectedCategories.push(name);
                 btn.className = "px-4 py-2 rounded-xl border border-blue-400 bg-blue-500 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/20";
             }
-            updateStartButton();
+            updateStartenButton();
         }
 
-        function updateStartButton() {
+        function updateStartenButton() {
             const btn = document.getElementById('start-btn');
             const count = selectedCategories.length;
             document.getElementById('category-count-message').textContent = `SELECTED: ${count} DECK${count!==1?'S':''}`;

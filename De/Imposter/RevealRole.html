@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <button onclick="nextPlayer()" id="next-player-btn" class="w-full max-w-xs py-4 bg-white/5 border border-white/10 text-white/40 font-bold rounded-2xl opacity-50 cursor-not-allowed">NEXT PLAYER (0/0)</button>
+        <button onclick="nextSpielener()" id="next-player-btn" class="w-full max-w-xs py-4 bg-white/5 border border-white/10 text-white/40 font-bold rounded-2xl opacity-50 cursor-not-allowed">NEXT PLAYER (0/0)</button>
     </main>
 
     <script>
@@ -79,7 +79,7 @@
             btn.textContent = `NEXT PLAYER (${currentIndex + 1}/${playersQueue.length})`;
         }
 
-        function dragStart(e) { isDragging = true; startY = e.touches ? e.touches[0].clientY : e.clientY; document.getElementById('card-front').style.transition = 'none'; }
+        function dragStarten(e) { isDragging = true; startY = e.touches ? e.touches[0].clientY : e.clientY; document.getElementById('card-front').style.transition = 'none'; }
         function dragMove(e) {
             if(!isDragging) return;
             const y = e.touches ? e.touches[0].clientY : e.clientY;
@@ -99,7 +99,7 @@
             }
         }
 
-        function nextPlayer() {
+        function nextSpielener() {
             if(currentIndex >= playersQueue.length - 1) { window.location.href = './Game.html'; return; }
             currentIndex++; renderCard(playersQueue[currentIndex]);
         }
@@ -107,8 +107,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             assignRoles(); renderCard(playersQueue[0]);
             const front = document.getElementById('card-front');
-            front.addEventListener('mousedown', dragStart); window.addEventListener('mousemove', dragMove); window.addEventListener('mouseup', dragEnd);
-            front.addEventListener('touchstart', dragStart); window.addEventListener('touchmove', dragMove); window.addEventListener('touchend', dragEnd);
+            front.addEventListener('mousedown', dragStarten); window.addEventListener('mousemove', dragMove); window.addEventListener('mouseup', dragEnd);
+            front.addEventListener('touchstart', dragStarten); window.addEventListener('touchmove', dragMove); window.addEventListener('touchend', dragEnd);
         });
     </script>
 </body>

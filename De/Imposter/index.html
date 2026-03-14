@@ -37,10 +37,10 @@
             <form id="imposter-settings-form" class="space-y-8">
                 
                 <div>
-                    <label class="block text-sm font-bold text-warm-dusk uppercase tracking-widest mb-3">Add Players</label>
+                    <label class="block text-sm font-bold text-warm-dusk uppercase tracking-widest mb-3">Add Spieleners</label>
                     <div class="flex gap-2 mb-4">
                         <input type="text" id="player-input" placeholder="Name" class="flex-grow bg-white/5 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-warm-dusk text-white">
-                        <button type="button" onclick="addPlayer()" class="bg-warm-dusk text-white px-6 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all">Add</button>
+                        <button type="button" onclick="addSpielener()" class="bg-warm-dusk text-white px-6 rounded-xl font-bold hover:scale-105 active:scale-95 transition-all">Add</button>
                     </div>
                     <div id="player-list" class="flex flex-wrap gap-2 min-h-[40px]"></div>
                     <p class="text-[10px] text-subtle-gray mt-2 font-bold" id="player-count-display">PLAYERS: 0 (MIN 3)</p>
@@ -109,17 +109,17 @@
             document.getElementById('player-count-display').textContent = `PLAYERS: ${state.players.length} (MIN 3)`;
             document.getElementById('imposter-count-value').textContent = state.imposterCount;
             document.getElementById('game-time-display').textContent = state.gameTime == 0.5 ? '30 sec' : `${state.gameTime} min`;
-            renderPlayers();
+            renderSpieleners();
         }
 
-        function renderPlayers() {
+        function renderSpieleners() {
             document.getElementById('player-list').innerHTML = state.players.map(p => `
                 <div class="bg-warm-dusk/20 text-warm-dusk border border-warm-dusk/30 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2">
-                    ${p} <button type="button" onclick="removePlayer('${p}')">×</button>
+                    ${p} <button type="button" onclick="removeSpielener('${p}')">×</button>
                 </div>`).join('');
         }
 
-        function addPlayer() {
+        function addSpielener() {
             const name = document.getElementById('player-input').value.trim();
             if(name && !state.players.includes(name)) {
                 state.players.push(name);
@@ -128,7 +128,7 @@
             }
         }
 
-        function removePlayer(name) {
+        function removeSpielener(name) {
             state.players = state.players.filter(p => p !== name);
             saveState();
         }
@@ -137,7 +137,7 @@
         document.getElementById('imposter-count-slider').addEventListener('input', (e) => { state.imposterCount = e.target.value; saveState(); });
         document.getElementById('game-time-slider').addEventListener('input', (e) => { state.gameTime = e.target.value; saveState(); });
         document.getElementById('imposter-hint-toggle').addEventListener('change', (e) => { state.hintsOn = e.target.checked; saveState(); });
-        document.getElementById('player-input').addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); addPlayer(); }});
+        document.getElementById('player-input').addEventListener('keydown', (e) => { if(e.key === 'Enter') { e.preventDefault(); addSpielener(); }});
 
         async function init() {
             try {

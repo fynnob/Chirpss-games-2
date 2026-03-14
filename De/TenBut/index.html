@@ -94,10 +94,10 @@
                 selectedCategoryNames.push(name);
                 btn.className = "category-btn px-4 py-2 rounded-xl border border-green-400 bg-gradient-to-r from-yellow-500/20 to-green-500/20 text-white text-xs font-bold transition-all shadow-lg shadow-green-500/10";
             }
-            updateStartButton();
+            updateStartenButton();
         }
 
-        function updateStartButton() {
+        function updateStartenButton() {
             const btn = document.getElementById('start-btn');
             const count = selectedCategoryNames.length;
             document.getElementById('category-count-message').textContent = `SELECTED: ${count} PACK${count!==1?'S':''}`;

@@ -48,16 +48,16 @@
     <div class="flex-grow flex flex-col items-center justify-center p-4 relative z-10 pt-20">
         
         <div id="lobby-overlay" class="absolute inset-0 z-50 bg-deep-twilight flex flex-col items-center justify-center text-center p-6 hidden">
-            <h2 class="text-3xl font-black mb-6 text-white">Join Room</h2>
+            <h2 class="text-3xl font-black mb-6 text-white">Beitreten Room</h2>
             
             <div id="qr-area" class="bg-white p-2 rounded-xl shadow-2xl mb-6"></div>
             
             <div id="lobby-code-text" class="text-6xl font-mono font-black tracking-widest text-teal-400 mb-2">...</div>
             
             <p class="text-subtle-gray text-sm mb-8 font-bold uppercase tracking-widest">Scan or enter code</p>
-            <div id="player-count" class="text-lg font-bold text-white mb-8">Players: 0</div>
+            <div id="player-count" class="text-lg font-bold text-white mb-8">Spieleners: 0</div>
             
-            <button onclick="hostStartCountdown()" class="w-full max-w-xs py-4 bg-white text-black font-black text-xl rounded-2xl shadow-xl active:scale-95 transition-all">START GAME</button>
+            <button onclick="hostStartenCountdown()" class="w-full max-w-xs py-4 bg-white text-black font-black text-xl rounded-2xl shadow-xl active:scale-95 transition-all">START GAME</button>
             <button onclick="cleanupGhosts()" class="mt-4 text-xs text-subtle-gray underline">Kick inactive players</button>
         </div>
 
@@ -137,7 +137,7 @@
                 if(headerContainer) {
                     clearInterval(check);
                     
-                    // 1. Remove ONLY the Join Button (leaving the Logo intact)
+                    // 1. Remove ONLY the Beitreten Button (leaving the Logo intact)
                     const joinBtn = headerContainer.querySelector('button');
                     if(joinBtn) joinBtn.remove();
                     
@@ -177,7 +177,7 @@
             if(mode === 'single') {
                 runCountdown(5, () => showNextWordSingle());
             } else {
-                hostStartCountdown();
+                hostStartenCountdown();
             }
         }
 
@@ -207,12 +207,12 @@
                    if(endBtn) endBtn.classList.remove('hidden');
                 }, 1000);
 
-                const joinUrl = `https://gc.fynn.qzz.io/En/Join/?code=${code}`;
+                const joinUrl = `https://gc.fynn.qzz.io/En/Beitreten/?code=${code}`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(joinUrl)}`;
                 document.getElementById('qr-area').innerHTML = `<img src="${qrUrl}" alt="QR">`;
 
                 dbRef.child('players').on('value', snap => {
-                    document.getElementById('player-count').textContent = `Players: ${snap.numChildren()}`;
+                    document.getElementById('player-count').textContent = `Spieleners: ${snap.numChildren()}`;
                 });
             } else {
                 document.getElementById('waiting-overlay').classList.remove('hidden');
@@ -244,7 +244,7 @@
             });
         }
 
-        function hostStartCountdown() {
+        function hostStartenCountdown() {
             showControls(false); // Hide button to prevent spam
 
             dbRef.once('value', snap => {
