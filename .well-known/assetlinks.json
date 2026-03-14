@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.qzz.fynn.gc.twa",
+        "sha256_cert_fingerprints": ["74:1A:A9:FC:3C:80:64:5F:DC:04:5B:C9:7F:85:1F:31:A9:1F:D5:24:A5:48:AB:12:0E:F8:A1:7E:AC:1F:98:EC"]
+      }
+    }]
