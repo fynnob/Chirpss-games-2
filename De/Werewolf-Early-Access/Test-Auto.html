@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIRPSS | Omni-Validator v4.1</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; background: #020617; color: #cbd5e1; height: 100vh; overflow: hidden; }
+        .debug-grid { display: grid; grid-template-columns: 380px 1fr; height: 100%; gap: 1px; background: #1e293b; }
+        .panel { background: #020617; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; }
+        .log-entry { border-bottom: 1px solid #1e293b; padding: 10px; font-size: 11px; }
+        .pass { border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.05); }
+        .fail { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.1); color: #f87171; font-weight: bold; }
+        .category { border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.1); color: #60a5fa; font-weight: 800; text-transform: uppercase; margin-top: 10px; }
+        .stat-card { @apply bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-inner; }
+    </style>
+</head>
+<body class="debug-grid">
+
+    <div class="panel border-r border-slate-800">
+        <h1 class="text-2xl font-black text-white tracking-tighter mb-1">OMNI-VALIDATOR 4.1</h1>
+        <div id="stats-container" class="grid grid-cols-2 gap-2 mb-6"></div>
+        <button onclick="runOmniGauntlet()" id="run-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/20 mb-4">
+            🔥 START DIAGNOSTICS
+        </button>
+        <div class="bg-black/40 p-4 rounded-lg border border-slate-800 text-[10px] space-y-2">
+            <p class="text-slate-500 uppercase font-bold">STATUS: <span id="progress-indicator" class="text-indigo-400">IDLE</span></p>
+        </div>
+    </div>
+
+    <div class="panel p-0 bg-black/20">
+        <div id="log-output" class="flex-grow">
+            <div class="h-full flex items-center justify-center text-slate-700 italic font-mono text-sm">System Ready.</div>
+        </div>
+    </div>
+
+    <script>
+        const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
+        const tally = { total: 0, pass: 0, fail: 0 };
+        window.WinRegistry = {};
+
+        // 1. DEFENSIVE LOAD: Ensure all scripts are present before testing
+        async function loadAllWinConditions() {
+            const scripts = ['village.js', 'werewolf.js', 'serial_killer.js', 'jester.js', 'lovers.js', 'cult.js', 'white_werewolf.js', 'arsonist.js'];
+            const promises = scripts.map(s => {
+                return new Promise(res => {
+                    const sc = document.createElement('script');
+                    sc.src = `${CDN_BASE}/WinConditions/${s}`;
+                    sc.onload = () => res(true);
+                    sc.onerror = () => { console.error("Failed to load: " + s); res(false); };
+                    document.head.appendChild(sc);
+                });
+            });
+            await Promise.all(promises);
+        }
+
+        // 2. THE SIMULATOR
+        function runSimulation(ctx) {
+            let deaths = new Set();
+            let protected = new Set();
+            const na = ctx.nightActions || {};
+
+            if (na.doctorSave) protected.add(na.doctorSave);
+            if (na.bodyguardSave) protected.add(na.bodyguardSave);
+            if (na.witchUsedHeal && na.wolfTarget) protected.add(na.wolfTarget);
+
+            if (na.wolfTarget && !protected.has(na.wolfTarget)) deaths.add(na.wolfTarget);
+            if (na.skTarget) deaths.add(na.skTarget); // SK usually bypasses normal doctor
+            if (na.witchKill) deaths.add(na.witchKill);
+            
+            if (na.ignite && ctx.dousedIds) {
+                ctx.dousedIds.forEach(id => deaths.add(id));
+            }
+
+            return ctx.players.map(p => ({ ...p, isAlive: deaths.has(p.id) ? false : p.isAlive }));
+        }
+
+        async function runOmniGauntlet() {
+            document.getElementById('run-btn').disabled = true;
+            document.getElementById('progress-indicator').innerText = "LOADING SCRIPTS...";
+            await loadAllWinConditions();
+            
+            Object.assign(tally, { total: 0, pass: 0, fail: 0 });
+            document.getElementById('log-output').innerHTML = '';
+            document.getElementById('progress-indicator').innerText = "RUNNING...";
+
+            // PHASE 1: EXTREME THREATS
+            log("category", "Phase 1: Extreme Threats");
+            await assertWin("Cult Supremacy", {
+                players: [{id:'cl', role:'Cult Leader', team:'Neutral', isAlive:true}, {id:'v1', role:'Villager', team:'Village', isAlive:true}],
+                cultIds: ['v1'], links: [], nightActions: {}
+            }, 'Cult');
+
+            await assertWin("Arsonist Holocaust", {
+                players: [{id:'ar', role:'Arsonist', team:'Neutral', isAlive:true}, {id:'v1', role:'Villager', team:'Village', isAlive:true}],
+                dousedIds: ['v1'], nightActions: { ignite: true }, links: []
+            }, 'Arsonist');
+
+            // PHASE 2: PROTECTION
+            log("category", "Phase 2: Protection Conflicts");
+            const overkillRes = runSimulation({
+                players: [{id:'vic', role:'Villager', team:'Village', isAlive:true}],
+                nightActions: { wolfTarget: 'vic', skTarget: 'vic', doctorSave: 'vic' }
+            });
+            assert(!overkillRes[0].isAlive, "SK should kill despite Doctor protection.");
+
+            // PHASE 3: STALEMATES
+            log("category", "Phase 3: Stalemate & Forbidden Love");
+            await assertWin("Romeo & Juliet", {
+                players: [{id:'w', role:'Werewolf', team:'Werewolf', isAlive:true}, {id:'v', role:'Villager', team:'Village', isAlive:true}],
+                links: ['w', 'v'], nightActions: {}
+            }, 'Lovers');
+
+            await assertWin("White Wolf Stalemate", {
+                players: [{id:'w', role:'Werewolf', team:'Werewolf', isAlive:true}, {id:'ww', role:'White Werewolf', team:'Evil', isAlive:true}],
+                links: [], nightActions: {}
+            }, null); // Should be NULL, game continues
+
+            updateStats();
+            document.getElementById('run-btn').disabled = false;
+            document.getElementById('progress-indicator').innerText = "COMPLETE";
+        }
+
+        // --- HELPERS ---
+        function log(type, msg) {
+            const out = document.getElementById('log-output');
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            div.innerHTML = `[${type.toUpperCase()}] ${msg}`;
+            out.prepend(div);
+        }
+
+        function assert(cond, msg) {
+            tally.total++;
+            if(cond) { tally.pass++; log("pass", msg); }
+            else { tally.fail++; log("fail", msg); }
+        }
+
+        async function assertWin(name, ctx, expected) {
+            tally.total++;
+            try {
+                let winner = null;
+                const wins = Object.values(window.WinRegistry).map(f => f(ctx)).filter(x => x !== null);
+                if(wins.length > 0) {
+                    wins.sort((a,b) => b.priority - a.priority);
+                    winner = wins[0].winner;
+                }
+                if(winner === expected) { tally.pass++; log("pass", `${name}: Correct.`); }
+                else { tally.fail++; log("fail", `${name}: Expected [${expected}] but got [${winner}].`); }
+            } catch(e) { tally.fail++; log("fail", `${name}: Error -> ${e.message}`); console.error(e); }
+        }
+
+        function updateStats() {
+            document.getElementById('stats-container').innerHTML = `
+                <div class="stat-card">
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Tests Run</span>
+                    <div class="text-xl font-black text-white">${tally.total}</div>
+                </div>
+                <div class="stat-card">
+                    <span class="text-[9px] font-bold text-green-500 uppercase">Passed</span>
+                    <div class="text-xl font-black text-green-400">${tally.pass}</div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
