@@ -1,19 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHIRPSS | 10/10 But</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
-
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>CHIRPSS | 10/10 But</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://gc.fynn.qzz.io/icon_2.png" rel="icon" type="image/png"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script defer="" src="https://cdn.fynn.qzz.io/layout.js"></script>
+<style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; min-height: 100vh; }
         .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
         
@@ -25,68 +23,64 @@
         /* Visualization Bars */
         .vis-bar { transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
+<meta content="Play Rate The Flaw on CHIRPSS. Fun party games for you and your friends for free online!" name="description"/>
+<meta content="party games, online games, multiplayer games, CHIRPSS, social games, browser games, free games" name="keywords"/>
+<meta content="CHIRPSS | 10/10 But" property="og:title"/>
+<meta content="Play Rate The Flaw on CHIRPSS. Fun party games for you and your friends for free online!" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://gc.fynn.qzz.io/En/TenBut/Game.html" property="og:url"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="CHIRPSS | 10/10 But" name="twitter:title"/>
+<meta content="Play Rate The Flaw on CHIRPSS. Fun party games for you and your friends for free online!" name="twitter:description"/>
+<link href="https://gc.fynn.qzz.io/En/TenBut/Game.html" rel="canonical"/>
 </head>
 <body class="flex flex-col relative">
-
-    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div id="blob-1" class="blob-bg bg-green-500/10 w-96 h-96 top-0 left-1/4 animate-drift"></div>
-    </div>
-
-    <chirpss-header></chirpss-header>
-
-    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
-        <div class="max-w-xl w-full">
-
-            <div id="gender-chooser" class="text-center animate-fade-in-up">
-                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-green-500 mb-2">Rate The Flaw</h1>
-                <p class="text-subtle-gray mb-8">Who are we judging?</p>
-                <div class="flex gap-3">
-                    <button onclick="setGender('boy')" class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-blue-400 hover:bg-blue-500/10 transition-all font-bold text-blue-400">Boy</button>
-                    <button onclick="setGender('trans')" class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-purple-400 hover:bg-purple-500/10 transition-all font-bold text-purple-400">They</button>
-                    <button onclick="setGender('girl')" class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-pink-400 hover:bg-pink-500/10 transition-all font-bold text-pink-400">Girl</button>
-                </div>
-            </div>
-
-            <div id="game-display" class="hidden">
-                
-                <div class="bg-card-bg/80 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-2xl relative mb-8">
-                    <button onclick="shareLink()" class="absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                    </button>
-                    <h2 id="main-prompt" class="text-xl font-bold text-green-400 uppercase tracking-widest mb-2">...</h2>
-                    <p id="but-prompt" class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">...</p>
-                </div>
-
-                <div id="rating-section">
-                    <div class="flex justify-between items-end mb-4 px-2">
-                        <span class="text-subtle-gray font-bold text-xs uppercase tracking-widest">Your Rating</span>
-                        <span class="text-4xl font-black text-yellow-400"><span id="rating-val">5</span><span class="text-lg text-white/30">/10</span></span>
-                    </div>
-                    
-                    <input type="range" id="rating-slider" min="1" max="10" value="5" oninput="updateRating(this.value)">
-                    
-                    <button id="submit-btn" onclick="submitRating()" class="mt-8 w-full py-4 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-extrabold text-lg rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-0" id="blob-container">
+<div class="blob-bg bg-green-500/10 w-96 h-96 top-0 left-1/4 animate-drift" id="blob-1"></div>
+</div>
+<chirpss-header></chirpss-header>
+<main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
+<div class="max-w-xl w-full">
+<div class="text-center animate-fade-in-up" id="gender-chooser">
+<h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-green-500 mb-2">Rate The Flaw</h1>
+<p class="text-subtle-gray mb-8">Who are we judging?</p>
+<div class="flex gap-3">
+<button class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-blue-400 hover:bg-blue-500/10 transition-all font-bold text-blue-400" onclick="setGender('boy')">Boy</button>
+<button class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-purple-400 hover:bg-purple-500/10 transition-all font-bold text-purple-400" onclick="setGender('trans')">They</button>
+<button class="flex-1 py-4 rounded-xl bg-card-bg border border-white/10 hover:border-pink-400 hover:bg-pink-500/10 transition-all font-bold text-pink-400" onclick="setGender('girl')">Girl</button>
+</div>
+</div>
+<div class="hidden" id="game-display">
+<div class="bg-card-bg/80 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-2xl relative mb-8">
+<button class="absolute top-4 right-4 p-2 bg-white/5 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-all" onclick="shareLink()">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg>
+</button>
+<h2 class="text-xl font-bold text-green-400 uppercase tracking-widest mb-2" id="main-prompt">...</h2>
+<p class="text-2xl sm:text-3xl font-extrabold text-white leading-tight" id="but-prompt">...</p>
+</div>
+<div id="rating-section">
+<div class="flex justify-between items-end mb-4 px-2">
+<span class="text-subtle-gray font-bold text-xs uppercase tracking-widest">Your Rating</span>
+<span class="text-4xl font-black text-yellow-400"><span id="rating-val">5</span><span class="text-lg text-white/30">/10</span></span>
+</div>
+<input id="rating-slider" max="10" min="1" oninput="updateRating(this.value)" type="range" value="5"/>
+<button class="mt-8 w-full py-4 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-extrabold text-lg rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all" id="submit-btn" onclick="submitRating()">
                         LOCK IN RATING
                     </button>
-                </div>
-
-                <div id="results-section" class="hidden animate-fade-in-up">
-                    <div class="h-32 flex items-end justify-between gap-1 mb-8" id="vis-grid">
-                        </div>
-                    
-                    <div class="flex gap-2">
-                         <button onclick="nextRound('boy')" class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-blue-500/20 hover:border-blue-400 text-white rounded-xl font-bold text-sm transition-all">Boy</button>
-                         <button onclick="nextRound('trans')" class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-purple-500/20 hover:border-purple-400 text-white rounded-xl font-bold text-sm transition-all">They</button>
-                         <button onclick="nextRound('girl')" class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-pink-500/20 hover:border-pink-400 text-white rounded-xl font-bold text-sm transition-all">Girl</button>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </main>
-
-    <script>
+</div>
+<div class="hidden animate-fade-in-up" id="results-section">
+<div class="h-32 flex items-end justify-between gap-1 mb-8" id="vis-grid">
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-blue-500/20 hover:border-blue-400 text-white rounded-xl font-bold text-sm transition-all" onclick="nextRound('boy')">Boy</button>
+<button class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-purple-500/20 hover:border-purple-400 text-white rounded-xl font-bold text-sm transition-all" onclick="nextRound('trans')">They</button>
+<button class="flex-1 py-3 bg-white/5 border border-white/10 hover:bg-pink-500/20 hover:border-pink-400 text-white rounded-xl font-bold text-sm transition-all" onclick="nextRound('girl')">Girl</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
         const firebaseConfig = {
             apiKey: "AIzaSyAdgoyDsUteoRBIQ74NXvg5Xfj8V105Dnw",
             authDomain: "chirpssgames.firebaseapp.com",

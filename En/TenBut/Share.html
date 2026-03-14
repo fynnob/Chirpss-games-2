@@ -1,46 +1,50 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Rate The Flaw</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIRPSS | Rate The Flaw</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://gc.fynn.qzz.io/icon_2.png" rel="icon" type="image/png"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; min-height: 100vh; }
         input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: #1e293b; border-radius: 4px; outline: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #eab308; cursor: pointer; border: 2px solid #0f172a; }
         .vis-bar { transition: height 0.5s ease; }
     </style>
+<meta content="Play free social deduplication and party games with your friends online on CHIRPSS!" name="description"/>
+<meta content="party games, online games, multiplayer games, CHIRPSS, social games, browser games, free games" name="keywords"/>
+<meta content="CHIRPSS | Rate The Flaw" property="og:title"/>
+<meta content="Play free social deduplication and party games with your friends online on CHIRPSS!" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://gc.fynn.qzz.io/En/TenBut/Share.html" property="og:url"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="CHIRPSS | Rate The Flaw" name="twitter:title"/>
+<meta content="Play free social deduplication and party games with your friends online on CHIRPSS!" name="twitter:description"/>
+<link href="https://gc.fynn.qzz.io/En/TenBut/Share.html" rel="canonical"/>
 </head>
 <body class="flex flex-col items-center justify-center p-4">
-
-    <div class="max-w-md w-full bg-slate-900 border border-white/10 p-8 rounded-3xl shadow-2xl relative">
-        <h2 id="main-prompt" class="text-sm font-bold text-green-400 uppercase tracking-widest mb-2">...</h2>
-        <p id="but-prompt" class="text-2xl font-extrabold text-white leading-tight mb-8">...</p>
-
-        <div id="rating-ui">
-            <div class="flex justify-between items-end mb-4">
-                <span class="text-xs font-bold text-gray-500 uppercase">Your Vote</span>
-                <span class="text-3xl font-black text-yellow-400" id="rating-val">5</span>
-            </div>
-            <input type="range" min="1" max="10" value="5" oninput="document.getElementById('rating-val').textContent = this.value">
-            <button onclick="submitVote()" class="mt-6 w-full py-3 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-bold rounded-xl shadow-lg">VOTE</button>
-        </div>
-
-        <div id="results-ui" class="hidden">
-            <div class="h-32 flex items-end justify-between gap-1 mb-6" id="vis-grid"></div>
-            <a href="index.html" class="block w-full py-3 text-center bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all">Play Full Game</a>
-        </div>
-    </div>
-
-    <script>
+<div class="max-w-md w-full bg-slate-900 border border-white/10 p-8 rounded-3xl shadow-2xl relative">
+<h2 class="text-sm font-bold text-green-400 uppercase tracking-widest mb-2" id="main-prompt">...</h2>
+<p class="text-2xl font-extrabold text-white leading-tight mb-8" id="but-prompt">...</p>
+<div id="rating-ui">
+<div class="flex justify-between items-end mb-4">
+<span class="text-xs font-bold text-gray-500 uppercase">Your Vote</span>
+<span class="text-3xl font-black text-yellow-400" id="rating-val">5</span>
+</div>
+<input max="10" min="1" oninput="document.getElementById('rating-val').textContent = this.value" type="range" value="5"/>
+<button class="mt-6 w-full py-3 bg-gradient-to-r from-yellow-500 to-green-500 text-white font-bold rounded-xl shadow-lg" onclick="submitVote()">VOTE</button>
+</div>
+<div class="hidden" id="results-ui">
+<div class="h-32 flex items-end justify-between gap-1 mb-6" id="vis-grid"></div>
+<a class="block w-full py-3 text-center bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-all" href="index.html">Play Full Game</a>
+</div>
+</div>
+<script>
         const firebaseConfig = {
             apiKey: "AIzaSyAdgoyDsUteoRBIQ74NXvg5Xfj8V105Dnw",
             authDomain: "chirpssgames.firebaseapp.com",

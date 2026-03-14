@@ -1,14 +1,15 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Werewolf Game</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
-    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIRPSS | Werewolf Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://gc.fynn.qzz.io/icon_2.png" rel="icon" type="image/png"/>
+<script defer="" src="https://cdn.fynn.qzz.io/layout.js"></script>
+<style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; min-height: 100vh; transition: background-color 1s ease; }
         .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: all 1s ease; z-index: 0; }
         .hidden { display: none !important; }
@@ -18,58 +19,71 @@
         .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
         .btn-action { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none; }
     </style>
+<meta content="Play Loading... on CHIRPSS. Fun party games for you and your friends for free online!" name="description"/>
+<meta content="party games, online games, multiplayer games, CHIRPSS, social games, browser games, free games" name="keywords"/>
+<meta content="CHIRPSS | Werewolf Game" property="og:title"/>
+<meta content="Play Loading... on CHIRPSS. Fun party games for you and your friends for free online!" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://gc.fynn.qzz.io/En/Werewolf-Early-Access/Game.html" property="og:url"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="CHIRPSS | Werewolf Game" name="twitter:title"/>
+<meta content="Play Loading... on CHIRPSS. Fun party games for you and your friends for free online!" name="twitter:description"/>
+<link href="https://gc.fynn.qzz.io/En/Werewolf-Early-Access/Game.html" rel="canonical"/>
 </head>
 <body class="flex flex-col relative mode-night">
-    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div id="blob-1" class="blob-bg bg-indigo-600/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
-        <div id="blob-2" class="blob-bg bg-purple-600/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-0" id="blob-container">
+<div class="blob-bg bg-indigo-600/20 w-96 h-96 top-0 left-1/4 animate-drift" id="blob-1"></div>
+<div class="blob-bg bg-purple-600/20 w-80 h-80 top-40 right-1/4 animate-drift" id="blob-2"></div>
+</div>
+<chirpss-header></chirpss-header>
+<main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 w-full max-w-xl mx-auto">
+<div class="text-center animate-pulse" id="loading-view"><h1 class="text-xl font-bold text-indigo-400 uppercase tracking-widest">Loading...</h1></div>
+<div class="hidden w-full text-center py-10 transition-all duration-500" id="narrator-view">
+<div class="text-6xl mb-8 opacity-80 animate-bounce" id="narrator-icon">🌑</div>
+<h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4" id="narrator-sub">Phase</h2>
+<h1 class="text-4xl sm:text-5xl font-black text-white mb-12 leading-tight drop-shadow-2xl" id="narrator-main">...</h1>
+<button class="hidden w-full max-w-xs py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold text-xl rounded-xl shadow-lg mx-auto" id="wake-btn" onclick="revealRoleView()">I Am Ready</button>
+</div>
+<div class="hidden w-full bg-slate-900/60 border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-md" id="action-view"></div>
+<div class="hidden w-full text-center mt-6" id="day-view">
+<div class="bg-slate-950/80 border border-red-900/30 rounded-3xl p-8 shadow-[0_0_40px_-15px_rgba(220,38,38,0.4)] backdrop-blur-md mb-8 relative overflow-hidden">
+<div class="absolute -top-10 -right-10 text-9xl text-white/5 rotate-12 blur-sm pointer-events-none">🐺</div>
+<div class="text-6xl mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.6)]">☀️</div>
+<h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-red-300 mb-4 uppercase tracking-wider" style="text-shadow: 0 0 10px rgba(185,28,28,0.2);">Town Square</h2>
+<div class="text-base sm:text-lg text-gray-200 font-medium leading-relaxed space-y-2 mb-6 pb-6 border-b border-red-900/40" id="morning-report">...</div>
+<div class="timer-container flex flex-col items-center justify-center bg-black/40 rounded-xl p-4 border border-red-900/30">
+    <p class="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">Discussion Phase</p>
+    <div class="text-5xl font-mono font-black text-red-500 tracking-wider shadow-red-900/50 drop-shadow-md" id="day-timer">03:00</div>
+</div>
+</div>
+<div class="flex items-center justify-between mb-4 px-2">
+    <h3 class="text-sm font-bold text-red-400 uppercase tracking-widest">Citizens</h3>
+    <span class="text-xs font-bold text-gray-600 bg-gray-900/50 px-3 py-1 rounded-full border border-gray-800">Vote to Lynch</span>
+</div>
+<div class="grid grid-cols-1 gap-3 relative z-20" id="vote-buttons"></div>
+</div>
+</main>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md modal-enter transition-all duration-300" id="custom-modal">
+    <div class="bg-gray-950 border border-red-900/50 rounded-3xl w-full max-w-sm shadow-[0_0_50px_rgba(220,38,38,0.15)] overflow-hidden p-8 text-center relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-900 via-red-500 to-red-900"></div>
+        <h3 class="text-2xl font-black text-white mb-3 tracking-wide drop-shadow-md" id="modal-title"></h3>
+        <p class="text-gray-300 text-base mb-8 leading-relaxed font-medium" id="modal-msg"></p>
+        <div class="flex gap-3 justify-center" id="modal-actions"></div>
     </div>
-    <chirpss-header></chirpss-header>
-
-    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4 w-full max-w-xl mx-auto">
-        <div id="loading-view" class="text-center animate-pulse"><h1 class="text-xl font-bold text-indigo-400 uppercase tracking-widest">Loading...</h1></div>
-
-        <div id="narrator-view" class="hidden w-full text-center py-10 transition-all duration-500">
-            <div id="narrator-icon" class="text-6xl mb-8 opacity-80 animate-bounce">🌑</div>
-            <h2 id="narrator-sub" class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Phase</h2>
-            <h1 id="narrator-main" class="text-4xl sm:text-5xl font-black text-white mb-12 leading-tight drop-shadow-2xl">...</h1>
-            <button id="wake-btn" onclick="revealRoleView()" class="hidden w-full max-w-xs py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold text-xl rounded-xl shadow-lg mx-auto">I Am Ready</button>
-        </div>
-
-        <div id="action-view" class="hidden w-full bg-slate-900/60 border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-md"></div>
-
-        <div id="day-view" class="hidden w-full text-center">
-            <div class="bg-slate-900/60 border border-white/10 rounded-3xl p-8 shadow-2xl backdrop-blur-md mb-8">
-                <div class="text-6xl mb-4">☀️</div>
-                <h2 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 mb-4">Morning Report</h2>
-                <div id="morning-report" class="text-lg text-white font-medium leading-relaxed space-y-2">...</div>
-            </div>
-            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Actions</h3>
-            <div id="vote-buttons" class="grid grid-cols-1 gap-2"></div>
-        </div>
-    </main>
-
-    <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200">
-        <div class="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden p-6 text-center">
-            <h3 id="modal-title" class="text-xl font-black text-white mb-2"></h3>
-            <p id="modal-msg" class="text-gray-400 text-sm mb-6"></p>
-            <div id="modal-actions" class="flex gap-2 justify-center"></div>
-        </div>
-    </div>
-
-    <div id="game-over-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl modal-enter transition-all duration-500">
-        <div class="text-center max-w-md w-full">
-            <div class="text-8xl mb-6">🏆</div>
-            <h1 id="go-winner" class="text-5xl font-black text-white mb-4 leading-tight">WINNER</h1>
-            <p id="go-msg" class="text-lg text-gray-400 font-medium mb-12"></p>
-            <button onclick="window.location.href='index.html'" class="w-full py-4 bg-white text-slate-900 font-extrabold rounded-xl uppercase">Return to Menu</button>
-        </div>
-    </div>
-
-    <script>
-        const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
+</div>
+</div>
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl modal-enter transition-all duration-500" id="game-over-modal">
+<div class="text-center max-w-md w-full">
+<div class="text-8xl mb-6">🏆</div>
+<h1 class="text-5xl font-black text-white mb-4 leading-tight" id="go-winner">WINNER</h1>
+<p class="text-lg text-gray-400 font-medium mb-12" id="go-msg"></p>
+<button class="w-full py-4 bg-white text-slate-900 font-extrabold rounded-xl uppercase" onclick="window.location.href='index.html'">Return to Menu</button>
+</div>
+</div>
+<script>
+        const CDN_BASE = "../../cdn-chirpss/Werewolf";
         let ROLES_DB = {};
-        let GameContext = { players: [], phase: 'init', turn: 0, nightActions: {}, activeRoleIndex: 0, nightOrder: [], links: [], lynchedId: null, dousedIds: [], cultIds: [], wolfCubDied: false };
+        let GameContext = { dayTimerInterval: null, dayTimeLeft: 180, players: [], phase: 'init', turn: 0, nightActions: {}, activeRoleIndex: 0, nightOrder: [], links: [], lynchedId: null, dousedIds: [], cultIds: [], wolfCubDied: false };
         window.RoleRegistry = {}; window.WinRegistry = {}; 
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -114,6 +128,8 @@
 
         // --- CORE ENGINE ---
         function startNightPhase() {
+            clearInterval(GameContext.dayTimerInterval);
+            clearInterval(GameContext.dayTimerInterval);
             GameContext.phase = 'night'; GameContext.nightActions = {}; GameContext.lynchedId = null; GameContext.turn++;
             document.body.className = 'mode-night';
             document.getElementById('blob-1').className = "blob-bg bg-indigo-900/20 w-96 h-96 top-0 left-1/4 animate-drift";
@@ -289,9 +305,8 @@
                 btn.innerText = p.name;
                 btn.onclick = () => {
                     p.isAlive = false;
-                    alert(`${hunter.name} shot ${p.name}!`); // Keeping alert for chain simplicity or replace with modal later
-                    document.body.removeChild(modal);
-                    handleHunterQueue(hunters, index + 1);
+                    showModal("Shot Fired!", `${hunter.name} shot ${p.name}!`, () => { document.body.removeChild(modal); handleHunterQueue(hunters, index + 1); });
+                    
                 };
                 grid.appendChild(btn);
             });
@@ -305,38 +320,82 @@
         }
 
         function renderDayActions() {
-            const alive = GameContext.players.filter(p => p.isAlive);
+            // Set Timer
+            clearInterval(GameContext.dayTimerInterval);
+            GameContext.dayTimeLeft = 180; // 3 minutes discussion
+            const timerEl = document.getElementById('day-timer');
+            const updateTimer = () => {
+                const mins = Math.floor(GameContext.dayTimeLeft / 60).toString().padStart(2, '0');
+                const secs = (GameContext.dayTimeLeft % 60).toString().padStart(2, '0');
+                if(timerEl) timerEl.innerText = `${mins}:${secs}`;
+                
+                if(GameContext.dayTimeLeft <= 10) {
+                    timerEl.classList.add('animate-pulse', 'text-red-600');
+                } else {
+                    timerEl.classList.remove('animate-pulse', 'text-red-600');
+                }
+
+                if(GameContext.dayTimeLeft <= 0) {
+                    clearInterval(GameContext.dayTimerInterval);
+                    timerEl.innerText = "00:00";
+                    // Timer done! Highlight voting
+                } else {
+                    GameContext.dayTimeLeft--;
+                }
+            };
+            updateTimer();
+            GameContext.dayTimerInterval = setInterval(updateTimer, 1000);
+
             const container = document.getElementById('vote-buttons');
             container.innerHTML = '';
 
+            const alive = GameContext.players.filter(p => p.isAlive);
+            
             // 1. Gunner Check
             const gunner = alive.find(p => p.role === 'Gunner');
             if(gunner && !gunner.hasShot) {
                 const gunBtn = document.createElement('button');
-                gunBtn.className = "w-full py-3 mb-4 bg-orange-600 text-white font-bold rounded-xl uppercase tracking-widest";
+                gunBtn.className = "w-full py-3 mb-4 bg-orange-700/80 hover:bg-orange-600 transition-colors shadow-lg shadow-orange-900/50 text-white font-black rounded-xl uppercase tracking-widest border border-orange-500/50";
                 gunBtn.innerText = `🔫 Gunner Action (${gunner.name})`;
                 gunBtn.onclick = () => {
                     gunner.hasShot = true;
-                    // Show gunner kill UI (simplified: just list targets)
-                    showModal("Gunner Shoot", "Select a target to kill immediately.", null, null); 
-                    // To implement properly, reuse the Hunter Queue UI logic here.
-                    // For MVP: Just alert "Gunner used ability"
-                    alert("Gunner logic requires full UI. Implemented via console in debugging.");
+                    showModal("Gunner Action", "Gunner UI is not fully implemented yet.", () => {});
                 };
                 container.appendChild(gunBtn);
             }
 
-            // 2. Voting List
-            alive.forEach(p => {
+            // 2. Player List (Alive AND Dead)
+            GameContext.players.forEach(p => {
                 const btn = document.createElement('button');
-                btn.className = "bg-white/5 border border-white/10 p-4 rounded-xl font-bold hover:bg-white/10 text-left w-full mb-2 flex justify-between";
-                btn.innerHTML = `<span>${p.name}</span> <span class="text-xs text-gray-500 font-bold opacity-50">VOTE</span>`;
-                btn.onclick = () => lynch(p.id);
+                
+                if (p.isAlive) {
+                    btn.className = "bg-slate-900/80 border border-slate-700/50 p-4 rounded-2xl font-bold hover:bg-red-900/40 hover:border-red-500/50 transition-all duration-300 text-left w-full flex justify-between items-center group shadow-md backdrop-blur-sm";
+                    btn.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
+                            <span class="text-gray-200 group-hover:text-white transition-colors duration-200 uppercase tracking-widest text-sm sm:text-base cursor-pointer pointer-events-none">${p.name}</span>
+                        </div>
+                        <span class="text-xs text-red-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 border border-red-500/30 px-3 py-1 bg-red-900/20 rounded-lg pointer-events-none">LYNCH</span>
+                    `;
+                    btn.onclick = () => lynch(p.id);
+                } else {
+                    btn.className = "bg-black/50 border border-red-900/10 p-4 rounded-2xl font-bold text-left w-full flex justify-between items-center opacity-70 cursor-not-allowed grayscale";
+                    btn.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="text-xl opacity-80 pointer-events-none">💀</div>
+                            <span class="text-red-300/40 uppercase tracking-widest line-through decoration-red-900/60 pointer-events-none text-sm sm:text-base">${p.name}</span>
+                        </div>
+                        <span class="text-[10px] text-red-900/80 font-black pointer-events-none px-2 tracking-widest uppercase">Dead</span>
+                    `;
+                    btn.disabled = true;
+                }
+                
                 container.appendChild(btn);
             });
         }
-
         window.lynch = function(id) {
+            clearInterval(GameContext.dayTimerInterval);
+            clearInterval(GameContext.dayTimerInterval);
             const p = GameContext.players.find(x => x.id === id);
             showModal("Cast Vote?", `Eliminate ${p.name}?`, () => {
                 p.isAlive = false;
@@ -365,12 +424,13 @@
             act.innerHTML = '';
             
             if(onCancel) {
-                const c = document.createElement('button'); c.innerText="Cancel"; c.className="flex-1 py-3 bg-white/10 rounded-xl font-bold text-xs"; c.onclick=() => { m.classList.remove('modal-enter-active'); m.classList.add('modal-enter'); onCancel(); }; act.appendChild(c);
+                const c = document.createElement('button'); c.innerText="Cancel"; c.className="flex-1 py-3 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors rounded-xl font-bold text-sm tracking-wider uppercase text-gray-300"; c.onclick=() => { m.classList.remove('modal-enter-active'); m.classList.add('modal-enter'); onCancel(); }; act.appendChild(c);
             }
-            const k = document.createElement('button'); k.innerText="Confirm"; k.className="flex-1 py-3 bg-indigo-600 rounded-xl font-bold text-xs"; k.onclick=() => { m.classList.remove('modal-enter-active'); m.classList.add('modal-enter'); if(onConfirm) onConfirm(); }; act.appendChild(k);
+            const k = document.createElement('button'); k.innerText="Confirm"; k.className="flex-1 py-3 bg-red-700 hover:bg-red-600 transition-colors shadow-lg shadow-red-900/50 rounded-xl font-bold text-sm tracking-wider uppercase text-white shadow-lg"; k.onclick=() => { m.classList.remove('modal-enter-active'); m.classList.add('modal-enter'); if(onConfirm) onConfirm(); }; act.appendChild(k);
+            
             m.classList.remove('modal-enter'); m.classList.add('modal-enter-active');
         }
-
+        
         function checkWin() {
             let wins = [];
             Object.values(window.WinRegistry).forEach(f => { const r = f(GameContext); if(r) wins.push(r); });

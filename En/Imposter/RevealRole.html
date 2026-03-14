@@ -1,40 +1,47 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Reveal Role</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIRPSS | Reveal Role</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://gc.fynn.qzz.io/icon_2.png" rel="icon" type="image/png"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer="" src="https://cdn.fynn.qzz.io/layout.js"></script>
+<style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; }
         .card-stack { position: relative; width: 320px; height: 420px; margin: 0 auto; user-select: none; }
         .role-card { position: absolute; inset: 0; border-radius: 2.5rem; display: flex; flex-direction: column; text-align: center; padding: 2.5rem; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #card-front { background: linear-gradient(135deg, #F97316, #F59E0B); color: white; z-index: 10; cursor: grab; box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3); justify-content: center; }
         #card-back { background: #1e293b; border: 2px solid rgba(255,255,255,0.1); z-index: 5; justify-content: flex-end; padding-bottom: 3.5rem; }
     </style>
+<meta content="Play free social deduplication and party games with your friends online on CHIRPSS!" name="description"/>
+<meta content="party games, online games, multiplayer games, CHIRPSS, social games, browser games, free games" name="keywords"/>
+<meta content="CHIRPSS | Reveal Role" property="og:title"/>
+<meta content="Play free social deduplication and party games with your friends online on CHIRPSS!" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://gc.fynn.qzz.io/En/Imposter/RevealRole.html" property="og:url"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="CHIRPSS | Reveal Role" name="twitter:title"/>
+<meta content="Play free social deduplication and party games with your friends online on CHIRPSS!" name="twitter:description"/>
+<link href="https://gc.fynn.qzz.io/En/Imposter/RevealRole.html" rel="canonical"/>
 </head>
 <body class="min-h-screen flex flex-col relative bg-deep-twilight">
-    <chirpss-header></chirpss-header>
-
-    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
-        <div class="text-center mb-10"><h2 class="text-3xl font-extrabold mb-2" id="main-title">Assignment</h2><p class="text-subtle-gray text-sm">Drag up to see role</p></div>
-
-        <div class="card-stack mb-10">
-            <div id="card-back" class="role-card"></div>
-            <div id="card-front" class="role-card">
-                <p class="text-xs font-bold opacity-80 uppercase tracking-tighter mb-2">Next up</p>
-                <h3 id="display-name" class="text-5xl font-black mb-4">PLAYER</h3>
-                <p class="text-[10px] font-bold uppercase tracking-widest animate-bounce mt-4">Pull up</p>
-            </div>
-        </div>
-
-        <button onclick="nextPlayer()" id="next-player-btn" class="w-full max-w-xs py-4 bg-white/5 border border-white/10 text-white/40 font-bold rounded-2xl opacity-50 cursor-not-allowed">NEXT PLAYER (0/0)</button>
-    </main>
-
-    <script>
+<chirpss-header></chirpss-header>
+<main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
+<div class="text-center mb-10"><h2 class="text-3xl font-extrabold mb-2" id="main-title">Assignment</h2><p class="text-subtle-gray text-sm">Drag up to see role</p></div>
+<div class="card-stack mb-10">
+<div class="role-card" id="card-back"></div>
+<div class="role-card" id="card-front">
+<p class="text-xs font-bold opacity-80 uppercase tracking-tighter mb-2">Next up</p>
+<h3 class="text-5xl font-black mb-4" id="display-name">PLAYER</h3>
+<p class="text-[10px] font-bold uppercase tracking-widest animate-bounce mt-4">Pull up</p>
+</div>
+</div>
+<button class="w-full max-w-xs py-4 bg-white/5 border border-white/10 text-white/40 font-bold rounded-2xl opacity-50 cursor-not-allowed" id="next-player-btn" onclick="nextPlayer()">NEXT PLAYER (0/0)</button>
+</main>
+<script>
         let gameData = JSON.parse(sessionStorage.getItem('chirpss_imposter_game_data'));
         let assignedRoles = {}; let playersQueue = gameData.players; let currentIndex = 0;
         let isDragging = false; let startY = 0; let currentY = 0;
