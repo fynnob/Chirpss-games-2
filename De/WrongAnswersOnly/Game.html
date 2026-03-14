@@ -1,16 +1,14 @@
-<!DOCTYPE html>
+html
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | WAO Survival</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script>
-    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
-
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIPPS | WAO-Überleben</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer="" src="https://cdn.fynn.qzz.io/layout.js"></script>
+<link href="https://gc.fynn.qzz.io/icon_2.png" rel="icon" type="image/png"/>
+<style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; }
         .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; z-index: 0; }
         .timer-bar { transition: width 0.1s linear, background-color 0.3s ease; }
@@ -18,50 +16,39 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative bg-deep-twilight">
-
-    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div id="blob-1" class="blob-bg bg-pink-500/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
-        <div id="blob-2" class="blob-bg bg-rose-500/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
-    </div>
-
-    <chirpss-header></chirpss-header>
-
-    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-6">
-        
-        <div id="game-state" class="w-full max-w-2xl text-center space-y-8 animate-fade-in-up">
-            <div class="w-full bg-white/5 h-3 rounded-full overflow-hidden border border-white/5">
-                <div id="visual-timer-fill" class="timer-bar h-full bg-pink-500 w-full"></div>
-            </div>
-
-            <div class="bg-card-bg/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
-                <p class="text-[10px] font-bold text-subtle-gray uppercase tracking-[0.2em] mb-2">Active Spielener</p>
-                <h3 id="current-player" class="text-4xl font-black text-pink-500">---</h3>
-            </div>
-
-            <div id="question-area" class="min-h-[200px] flex items-center justify-center">
-                <p class="prompt-text text-white italic">"Loading..."</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="playerEliminated(false)" class="py-5 bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-900/40 active:scale-95 transition-all">FAILED</button>
-                <button onclick="rotateSpielener()" class="py-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-2xl shadow-lg shadow-pink-500/20 active:scale-95 transition-all">WRONG ANSWER</button>
-            </div>
-        </div>
-
-        <div id="final-results-state" class="hidden text-center max-w-sm w-full bg-card-bg/60 border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-xl">
-            <h2 class="text-sm font-bold text-subtle-gray uppercase tracking-widest mb-2">Champion Survivor</h2>
-            <p id="winner-name" class="text-5xl font-black text-white mb-8"></p>
-            
-            <div class="text-left bg-white/5 p-6 rounded-2xl border border-white/5 mb-8">
-                <p class="text-[10px] font-bold text-subtle-gray uppercase tracking-widest mb-4">The Fallen</p>
-                <ul id="eliminated-players" class="space-y-2 text-rose-500 font-bold text-sm"></ul>
-            </div>
-
-            <button onclick="location.href='./index.html'" class="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-soft-horizon transition-all">PLAY AGAIN</button>
-        </div>
-    </main>
-
-    <script>
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-0" id="blob-container">
+<div class="blob-bg bg-pink-500/20 w-96 h-96 top-0 left-1/4 animate-drift" id="blob-1"></div>
+<div class="blob-bg bg-rose-500/20 w-80 h-80 top-40 right-1/4 animate-drift" id="blob-2"></div>
+</div>
+<chirpss-header></chirpss-header>
+<main class="relative z-10 flex-grow flex flex-col items-center justify-center p-6">
+<div class="w-full max-w-2xl text-center space-y-8 animate-fade-in-up" id="game-state">
+<div class="w-full bg-white/5 h-3 rounded-full overflow-hidden border border-white/5">
+<div class="timer-bar h-full bg-pink-500 w-full" id="visual-timer-fill"></div>
+</div>
+<div class="bg-card-bg/60 border border-white/10 p-6 rounded-3xl backdrop-blur-xl">
+<p class="text-[10px] font-bold text-subtle-gray uppercase tracking-[0.2em] mb-2">Aktiver Spieler</p>
+<h3 class="text-4xl font-black text-pink-500" id="current-player">---</h3>
+</div>
+<div class="min-h-[200px] flex items-center justify-center" id="question-area">
+<p class="prompt-text text-white italic">"Beladen..."</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="py-5 bg-rose-700 text-white font-black rounded-2xl shadow-lg shadow-rose-900/40 active:scale-95 transition-all" onclick="playerEliminated(false)">FEHLGESCHLAGEN</button>
+<button class="py-5 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black rounded-2xl shadow-lg shadow-pink-500/20 active:scale-95 transition-all" onclick="rotateSpielener()">FALSCHE ANTWORT</button>
+</div>
+</div>
+<div class="hidden text-center max-w-sm w-full bg-card-bg/60 border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-xl" id="final-results-state">
+<h2 class="text-sm font-bold text-subtle-gray uppercase tracking-widest mb-2">Champion-Überlebender</h2>
+<p class="text-5xl font-black text-white mb-8" id="winner-name"></p>
+<div class="text-left bg-white/5 p-6 rounded-2xl border border-white/5 mb-8">
+<p class="text-[10px] font-bold text-subtle-gray uppercase tracking-widest mb-4">Die Gefallenen</p>
+<ul class="space-y-2 text-rose-500 font-bold text-sm" id="eliminated-players"></ul>
+</div>
+<button class="w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-soft-horizon transition-all" onclick="location.href='./index.html'">SPIELEN SIE NOCHMAL</button>
+</div>
+</main>
+<script>
         let gameData = JSON.parse(sessionStorage.getItem('wao_game_data'));
         let activeSpieleners = [...gameData.players].sort(() => Math.random() - 0.5);
         let eliminatedSpieleners = [];

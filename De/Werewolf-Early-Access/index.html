@@ -1,18 +1,15 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+html
+<html class="scroll-smooth" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Werewolf Setup</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
-
-    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
-    <script src="https://cdn.fynn.qzz.io/cookies.js" defer></script> 
-
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIPPS | Werwolf-Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://gc.fynn.qzz.io/icon_2.png" rel="icon" type="image/png"/>
+<script defer="" src="https://cdn.fynn.qzz.io/layout.js"></script>
+<script defer="" src="https://cdn.fynn.qzz.io/cookies.js"></script>
+<style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow-x: hidden; }
         .blob-bg { position: fixed; border-radius: 50%; mix-blend-mode: screen; filter: blur(60px); opacity: 0.3; pointer-events: none; transition: transform 0.1s linear; z-index: 0; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
@@ -23,155 +20,132 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative bg-slate-950">
-
-    <div id="blob-container" class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div id="blob-1" class="blob-bg bg-indigo-600/20 w-96 h-96 top-0 left-1/4 animate-drift"></div>
-        <div id="blob-2" class="blob-bg bg-purple-600/20 w-80 h-80 top-40 right-1/4 animate-drift"></div>
-    </div>
-
-    <chirpss-header></chirpss-header>
-
-    <main class="relative z-10 max-w-2xl mx-auto p-4 sm:p-8 flex-grow w-full">
-        
-        <div class="text-center mb-8 animate-fade-in-up">
-            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Werewolf Setup</h2>
-        </div>
-
-        <div class="bg-slate-900/60 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
-            
-            <div class="mb-8">
-                <label class="block text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">Add Spieleners</label>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="player-input" placeholder="Name" class="flex-grow bg-white/5 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500">
-                    <button type="button" onclick="addSpielener()" class="bg-indigo-600 text-white px-6 rounded-xl font-bold hover:bg-indigo-500 active:scale-95 transition-all">Add</button>
-                </div>
-                
-                <div id="player-list" class="flex flex-wrap gap-2 min-h-[40px] mb-2"></div>
-                
-                <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                    <span id="player-count-display">Spieleners: 0 (Min 3)</span>
-                    <button onclick="resetSpieleners()" class="text-red-400 hover:text-red-300">Reset All</button>
-                </div>
-            </div>
-
-            <hr class="border-white/5 my-8">
-
-            <div>
-                <div class="flex justify-between items-end mb-4">
-                    <label class="block text-sm font-bold text-purple-400 uppercase tracking-widest">Deck Composition</label>
-                    <button onclick="openRoleModal()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors font-bold">+ Add Special Role</button>
-                </div>
-
-                <div id="active-roles-list" class="space-y-2">
-                    </div>
-
-                <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
-                    <div>
-                        <span class="text-xs font-bold text-gray-500 uppercase block">Cards Assigned</span>
-                        <span id="deck-status-text" class="text-[10px] text-red-400 hidden">Check player count!</span>
-                    </div>
-                    <div class="text-right">
-                        <span id="deck-count-display" class="text-2xl font-black text-white">0</span>
-                        <span class="text-gray-500 text-sm">/</span>
-                        <span id="req-count-display" class="text-xl font-bold text-gray-500">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="startGame()" id="start-btn" class="w-full mt-8 py-4 bg-gray-800 text-gray-500 font-extrabold text-xl rounded-xl cursor-not-allowed transition-all uppercase tracking-widest" disabled>
-                Starten Game
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-0" id="blob-container">
+<div class="blob-bg bg-indigo-600/20 w-96 h-96 top-0 left-1/4 animate-drift" id="blob-1"></div>
+<div class="blob-bg bg-purple-600/20 w-80 h-80 top-40 right-1/4 animate-drift" id="blob-2"></div>
+</div>
+<chirpss-header></chirpss-header>
+<main class="relative z-10 max-w-2xl mx-auto p-4 sm:p-8 flex-grow w-full">
+<div class="text-center mb-8 animate-fade-in-up">
+<h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">Werwolf-Setup</h2>
+</div>
+<div class="bg-slate-900/60 border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+<div class="mb-8">
+<label class="block text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">Spieler hinzufügen</label>
+<div class="flex gap-2 mb-4">
+<input class="flex-grow bg-white/5 border border-white/10 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500" id="player-input" placeholder="Name" type="text"/>
+<button class="bg-indigo-600 text-white px-6 rounded-xl font-bold hover:bg-indigo-500 active:scale-95 transition-all" onclick="addSpielener()" type="button">Hinzufügen</button>
+</div>
+<div class="flex flex-wrap gap-2 min-h-[40px] mb-2" id="player-list"></div>
+<div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
+<span id="player-count-display">Spieler: 0 (Min. 3)</span>
+<button class="text-red-400 hover:text-red-300" onclick="resetSpieleners()">Alles zurücksetzen</button>
+</div>
+</div>
+<hr class="border-white/5 my-8"/>
+<div>
+<div class="flex justify-between items-end mb-4">
+<label class="block text-sm font-bold text-purple-400 uppercase tracking-widest">Deckzusammensetzung</label>
+<button class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors font-bold" onclick="openRoleModal()">+ Sonderrolle hinzufügen</button>
+</div>
+<div class="space-y-2" id="active-roles-list">
+</div>
+<div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+<div>
+<span class="text-xs font-bold text-gray-500 uppercase block">Karten zugewiesen</span>
+<span class="text-[10px] text-red-400 hidden" id="deck-status-text">Überprüfen Sie die Spielerzahl!</span>
+</div>
+<div class="text-right">
+<span class="text-2xl font-black text-white" id="deck-count-display">0</span>
+<span class="text-gray-500 text-sm">/</span>
+<span class="text-xl font-bold text-gray-500" id="req-count-display">0</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-4 bg-gray-800 text-gray-500 font-extrabold text-xl rounded-xl cursor-not-allowed transition-all uppercase tracking-widest" disabled="" id="start-btn" onclick="startGame()">
+                Spiel starten
             </button>
-
-            <button onclick="openRegelnModal()" class="w-full mt-3 py-3 bg-white/5 text-indigo-300 font-bold text-sm rounded-xl hover:bg-white/10 transition-all uppercase tracking-widest border border-white/5">
-                How to Spielen
+<button class="w-full mt-3 py-3 bg-white/5 text-indigo-300 font-bold text-sm rounded-xl hover:bg-white/10 transition-all uppercase tracking-widest border border-white/5" onclick="openRegelnModal()">
+                Wie man spielt
             </button>
-
-        </div>
-    </main>
-
-    <div id="role-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200">
-        <div class="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-800/50">
-                <h3 class="font-bold text-white">Role Library</h3>
-                <button onclick="closeRoleModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
-            </div>
-            <div class="p-4 space-y-4 bg-slate-900">
-                <input type="text" id="role-search" placeholder="Search roles..." class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-indigo-500">
-                <div class="flex gap-2">
-                    <button onclick="filterRoles('all')" class="filter-tab active px-3 py-1 text-xs font-bold rounded-lg bg-white/10 text-white" data-filter="all">All</button>
-                    <button onclick="filterRoles('Village')" class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Village">Good</button>
-                    <button onclick="filterRoles('Werewolf')" class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Werewolf">Evil</button>
-                    <button onclick="filterRoles('Neutral')" class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Neutral">Neutral</button>
-                </div>
-            </div>
-            <div id="role-library-grid" class="p-4 overflow-y-auto custom-scrollbar grid grid-cols-1 gap-2"></div>
-        </div>
-    </div>
-
-    <div id="role-details-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md modal-enter transition-all duration-200" onclick="closeRoleDetails()">
-        <div class="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative" onclick="event.stopPropagation()">
-            <div class="p-6 text-center border-b border-white/5 bg-slate-800/30">
-                <div id="detail-emoji" class="text-6xl mb-4 filter drop-shadow-lg">❓</div>
-                <h2 id="detail-name" class="text-3xl font-black text-white mb-1">Role Name</h2>
-                <div id="detail-badge" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10">Team</div>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Activation</h3>
-                    <p id="detail-activation" class="text-sm text-white font-medium">When they wake up...</p>
-                </div>
-                <div>
-                    <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Ability</h3>
-                    <p id="detail-desc" class="text-sm text-gray-400 leading-relaxed">What they do...</p>
-                </div>
-                <div>
-                    <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Win Condition</h3>
-                    <p id="detail-win" class="text-sm text-white font-medium">How they win...</p>
-                </div>
-            </div>
-            <div class="p-4 bg-slate-800/30 border-t border-white/5">
-                <button onclick="closeRoleDetails()" class="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="rules-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200" onclick="closeRegelnModal()">
-        <div class="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative" onclick="event.stopPropagation()">
-            
-            <div class="p-6 pb-2 border-b border-white/5 bg-slate-800/30">
-                <h2 class="text-2xl font-black text-white mb-1">How to Spielen</h2>
-                <p class="text-xs text-indigo-400 font-bold uppercase tracking-widest">The Ultimate Party Game</p>
-                <button onclick="closeRegelnModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-gray-400 hover:text-white">&times;</button>
-            </div>
-
-            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
-                <div class="flex gap-4">
-                    <div class="w-10 h-10 shrink-0 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black border border-indigo-500/30">1</div>
-                    <div><h3 class="font-bold text-white mb-1">Secret Identity</h3><p class="text-sm text-gray-400 leading-relaxed">Pass the device around. Everyone learns their secret role (Villager, Werewolf, or Special) but must keep it hidden!</p></div>
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-10 h-10 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-black border border-purple-500/30">2</div>
-                    <div><h3 class="font-bold text-white mb-1">Night Phase</h3><p class="text-sm text-gray-400 leading-relaxed">Everyone closes their eyes. The app wakes up special roles (Werewolves, Seer, Doctor) one by one to perform secret actions.</p></div>
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-10 h-10 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-black border border-blue-500/30">3</div>
-                    <div><h3 class="font-bold text-white mb-1">Day Phase</h3><p class="text-sm text-gray-400 leading-relaxed">The sun rises. If someone died, they are out. Survivors discuss and vote to eliminate a suspect they think is a Werewolf.</p></div>
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-10 h-10 shrink-0 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-black border border-green-500/30">4</div>
-                    <div><h3 class="font-bold text-white mb-1">Winning</h3><p class="text-sm text-gray-400 leading-relaxed"><strong class="text-green-400">Village:</strong> Eliminate all Werewolves.<br><strong class="text-red-400">Werewolves:</strong> Equal or outnumber the Villagers.</p></div>
-                </div>
-            </div>
-
-            <div class="p-4 border-t border-white/5 bg-slate-800/30">
-                <button onclick="closeRegelnModal()" class="w-full py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-gray-200">Got it</button>
-            </div>
-        </div>
-    </div>
-
-    <chirpss-footer></chirpss-footer>
-
-    <script>
+</div>
+</main>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200" id="role-modal">
+<div class="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+<div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-800/50">
+<h3 class="font-bold text-white">Rollenbibliothek</h3>
+<button class="text-gray-400 hover:text-white text-xl" onclick="closeRoleModal()">×</button>
+</div>
+<div class="p-4 space-y-4 bg-slate-900">
+<input class="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-sm text-white focus:outline-none focus:border-indigo-500" id="role-search" placeholder="Search roles..." type="text"/>
+<div class="flex gap-2">
+<button class="filter-tab active px-3 py-1 text-xs font-bold rounded-lg bg-white/10 text-white" data-filter="all" onclick="filterRoles('all')">Alle</button>
+<button class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Village" onclick="filterRoles('Village')">Darm</button>
+<button class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Werewolf" onclick="filterRoles('Werewolf')">Teuflisch</button>
+<button class="filter-tab px-3 py-1 text-xs font-bold rounded-lg hover:bg-white/5 text-gray-400" data-filter="Neutral" onclick="filterRoles('Neutral')">Neutral</button>
+</div>
+</div>
+<div class="p-4 overflow-y-auto custom-scrollbar grid grid-cols-1 gap-2" id="role-library-grid"></div>
+</div>
+</div>
+<div class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md modal-enter transition-all duration-200" id="role-details-modal" onclick="closeRoleDetails()">
+<div class="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative" onclick="event.stopPropagation()">
+<div class="p-6 text-center border-b border-white/5 bg-slate-800/30">
+<div class="text-6xl mb-4 filter drop-shadow-lg" id="detail-emoji">❓</div>
+<h2 class="text-3xl font-black text-white mb-1" id="detail-name">Rollenname</h2>
+<div class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/10" id="detail-badge">Team</div>
+</div>
+<div class="p-6 space-y-4">
+<div>
+<h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Aktivierung</h3>
+<p class="text-sm text-white font-medium" id="detail-activation">Wenn sie aufwachen...</p>
+</div>
+<div>
+<h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Fähigkeit. Fähigkeit</h3>
+<p class="text-sm text-gray-400 leading-relaxed" id="detail-desc">War sie dran...</p>
+</div>
+<div>
+<h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">Gewinnbedingung</h3>
+<p class="text-sm text-white font-medium" id="detail-win">Wie sie gewinnen...</p>
+</div>
+</div>
+<div class="p-4 bg-slate-800/30 border-t border-white/5">
+<button class="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all" onclick="closeRoleDetails()">Schließen</button>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm modal-enter transition-all duration-200" id="rules-modal" onclick="closeRegelnModal()">
+<div class="bg-slate-900 border border-white/10 rounded-3xl w-full max-w-md max-h-[85vh] flex flex-col shadow-2xl overflow-hidden relative" onclick="event.stopPropagation()">
+<div class="p-6 pb-2 border-b border-white/5 bg-slate-800/30">
+<h2 class="text-2xl font-black text-white mb-1">Wie man spielt</h2>
+<p class="text-xs text-indigo-400 font-bold uppercase tracking-widest">Das ultimative Partyspiel</p>
+<button class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-gray-400 hover:text-white" onclick="closeRegelnModal()">×</button>
+</div>
+<div class="p-6 overflow-y-auto custom-scrollbar space-y-6">
+<div class="flex gap-4">
+<div class="w-10 h-10 shrink-0 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black border border-indigo-500/30">1</div>
+<div><h3 class="font-bold text-white mb-1">Geheime Identität</h3><p class="text-sm text-gray-400 leading-relaxed">Geben Sie das Gerät herum. Jeder lernt seine geheime Rolle (Dorfbewohner, Werwolf oder Spezial), muss sie aber geheim halten!</p></div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 shrink-0 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-black border border-purple-500/30">2</div>
+<div><h3 class="font-bold text-white mb-1">Nachtphase</h3><p class="text-sm text-gray-400 leading-relaxed">Alle schließen die Augen. Die App weckt nacheinander spezielle Rollen (Werwölfe, Seher, Doktor), um geheime Aktionen auszuführen.</p></div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 shrink-0 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-black border border-blue-500/30">3</div>
+<div><h3 class="font-bold text-white mb-1">Tagesphase</h3><p class="text-sm text-gray-400 leading-relaxed">Die Sonne geht auf. Wenn jemand gestorben ist, ist er draußen. Überlebende diskutieren und stimmen dafür, ein Verdächtigen zu eliminieren, den sie für einen Werwolf halten.</p></div>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 shrink-0 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-black border border-green-500/30">4</div>
+<div><h3 class="font-bold text-white mb-1">Gewinnen</h3><p class="text-sm text-gray-400 leading-relaxed"><strong class="text-green-400">Dorf:</strong> Eliminiere alle Werwölfe.<br/><strong class="text-red-400">Werwölfe:</strong> Gleich oder zahlenmäßig überlegen als die Dorfbewohner.</p></div>
+</div>
+</div>
+<div class="p-4 border-t border-white/5 bg-slate-800/30">
+<button class="w-full py-3 bg-white text-slate-900 font-bold rounded-xl hover:bg-gray-200" onclick="closeRegelnModal()">Habe es</button>
+</div>
+</div>
+</div>
+<chirpss-footer></chirpss-footer>
+<script>
         const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
         let ROLES_DB = {};
         let roleCounts = {}; 

@@ -1,12 +1,12 @@
-<!DOCTYPE html>
+html
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Omni-Validator v4.1</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIPPS | Omni-Validator v4.1</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
         body { font-family: 'JetBrains Mono', monospace; background: #020617; color: #cbd5e1; height: 100vh; overflow: hidden; }
         .debug-grid { display: grid; grid-template-columns: 380px 1fr; height: 100%; gap: 1px; background: #1e293b; }
         .panel { background: #020617; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; }
@@ -18,25 +18,22 @@
     </style>
 </head>
 <body class="debug-grid">
-
-    <div class="panel border-r border-slate-800">
-        <h1 class="text-2xl font-black text-white tracking-tighter mb-1">OMNI-VALIDATOR 4.1</h1>
-        <div id="stats-container" class="grid grid-cols-2 gap-2 mb-6"></div>
-        <button onclick="runOmniGauntlet()" id="run-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/20 mb-4">
-            🔥 START DIAGNOSTICS
+<div class="panel border-r border-slate-800">
+<h1 class="text-2xl font-black text-white tracking-tighter mb-1">OMNI-VALIDATOR 4.1</h1>
+<div class="grid grid-cols-2 gap-2 mb-6" id="stats-container"></div>
+<button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/20 mb-4" id="run-btn" onclick="runOmniGauntlet()">
+            🔥 STARTEN DIAGNOSE
         </button>
-        <div class="bg-black/40 p-4 rounded-lg border border-slate-800 text-[10px] space-y-2">
-            <p class="text-slate-500 uppercase font-bold">STATUS: <span id="progress-indicator" class="text-indigo-400">IDLE</span></p>
-        </div>
-    </div>
-
-    <div class="panel p-0 bg-black/20">
-        <div id="log-output" class="flex-grow">
-            <div class="h-full flex items-center justify-center text-slate-700 italic font-mono text-sm">System Ready.</div>
-        </div>
-    </div>
-
-    <script>
+<div class="bg-black/40 p-4 rounded-lg border border-slate-800 text-[10px] space-y-2">
+<p class="text-slate-500 uppercase font-bold">STATUS: <span class="text-indigo-400" id="progress-indicator">LEERLAUF</span></p>
+</div>
+</div>
+<div class="panel p-0 bg-black/20">
+<div class="flex-grow" id="log-output">
+<div class="h-full flex items-center justify-center text-slate-700 italic font-mono text-sm">Systembereit.</div>
+</div>
+</div>
+<script>
         const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
         const tally = { total: 0, pass: 0, fail: 0 };
         window.WinRegistry = {};

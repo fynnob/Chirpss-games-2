@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+html
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Reveal Role</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://gc.fynn.qzz.io/icon_2.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.fynn.qzz.io/layout.js" defer></script> 
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIPPS | Rolle offenbaren</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://gc.fynn.qzz.io/icon_2.png" rel="icon" type="image/png"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer="" src="https://cdn.fynn.qzz.io/layout.js"></script>
+<style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #F1F5F9; overflow: hidden; touch-action: none; }
         
         .card-stack { position: relative; width: 300px; height: 420px; margin: 0 auto; user-select: none; perspective: 1000px; }
@@ -49,47 +49,38 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative bg-slate-950">
-    
-    <div class="fixed inset-0 pointer-events-none z-0">
-        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-    </div>
-
-    <chirpss-header></chirpss-header>
-
-    <main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
-        
-        <div class="text-center mb-8">
-            <h2 class="text-2xl font-extrabold text-white mb-1" id="main-title">Secret Identity</h2>
-            <p class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Pass device to <span id="current-player-name" class="text-white">...</span></p>
-        </div>
-
-        <div class="card-stack mb-8">
-            <div id="card-back" class="role-card">
-                <div id="role-icon" class="text-6xl mb-4">❓</div>
-                <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">You are a</h2>
-                <h1 id="role-name" class="text-4xl font-black text-white mb-4 uppercase leading-tight">...</h1>
-                <p id="role-desc" class="text-sm font-medium text-gray-400 leading-relaxed">...</p>
-                <div id="team-badge" class="mt-6 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/5">...</div>
-            </div>
-
-            <div id="card-front" class="role-card">
-                <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 border border-white/20">
-                    <span class="text-4xl">🤫</span>
-                </div>
-                <h3 class="text-2xl font-black text-white mb-2">TAP & DRAG</h3>
-                <p class="text-xs font-bold text-indigo-200 opacity-70 uppercase tracking-widest mb-8">Slide up to reveal</p>
-                <div class="drag-hint text-white/50 text-2xl">▲</div>
-            </div>
-        </div>
-
-        <button onclick="confirmAndNext()" id="next-btn" class="w-full max-w-xs py-4 bg-slate-800 text-gray-500 font-bold rounded-xl transition-all uppercase tracking-widest text-sm" disabled>
-            Slide Up First
+<div class="fixed inset-0 pointer-events-none z-0">
+<div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+</div>
+<chirpss-header></chirpss-header>
+<main class="relative z-10 flex-grow flex flex-col items-center justify-center p-4">
+<div class="text-center mb-8">
+<h2 class="text-2xl font-extrabold text-white mb-1" id="main-title">Geheime Identität</h2>
+<p class="text-indigo-400 text-xs font-bold uppercase tracking-widest">Gerät weitergeben an <span class="text-white" id="current-player-name">...</span></p>
+</div>
+<div class="card-stack mb-8">
+<div class="role-card" id="card-back">
+<div class="text-6xl mb-4" id="role-icon">❓</div>
+<h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Du bist ein</h2>
+<h1 class="text-4xl font-black text-white mb-4 uppercase leading-tight" id="role-name">...</h1>
+<p class="text-sm font-medium text-gray-400 leading-relaxed" id="role-desc">...</p>
+<div class="mt-6 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/5" id="team-badge">...</div>
+</div>
+<div class="role-card" id="card-front">
+<div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-6 border border-white/20">
+<span class="text-4xl">🤫</span>
+</div>
+<h3 class="text-2xl font-black text-white mb-2">Tippen und ziehen</h3>
+<p class="text-xs font-bold text-indigo-200 opacity-70 uppercase tracking-widest mb-8">Zum Enthüllen nach oben schieben</p>
+<div class="drag-hint text-white/50 text-2xl">▲</div>
+</div>
+</div>
+<button class="w-full max-w-xs py-4 bg-slate-800 text-gray-500 font-bold rounded-xl transition-all uppercase tracking-widest text-sm" disabled="" id="next-btn" onclick="confirmAndNext()">
+            Schieben Sie zuerst nach oben
         </button>
-
-    </main>
-
-    <script>
+</main>
+<script>
         const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
         let playersQueue = [];
         let rolesDB = {};

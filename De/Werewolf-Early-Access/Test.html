@@ -1,14 +1,12 @@
-<!DOCTYPE html>
+html
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHIRPSS | Werewolf Debugger</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CHIPPS | Werwolf-Debugger</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
         body { font-family: 'JetBrains Mono', monospace; background-color: #0f172a; color: #a5b4fc; height: 100vh; overflow: hidden; }
         .debug-grid { display: grid; grid-template-columns: 300px 1fr 300px; height: 100%; gap: 1px; background: #334155; }
         .panel { background: #0f172a; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; }
@@ -40,69 +38,59 @@
     </style>
 </head>
 <body class="debug-grid">
-
-    <div class="panel">
-        <h2 class="text-lg font-bold text-white mb-2">BUILDER</h2>
-        
-        <div class="mb-4 bg-slate-900 p-2 rounded border border-slate-800">
-            <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Available Roles</h3>
-            <div id="role-selector" class="flex flex-wrap gap-1 mb-2"></div>
-            <h3 class="text-xs font-bold uppercase mb-1 text-gray-500">Current Deck (<span id="deck-count">0</span>)</h3>
-            <div id="custom-deck-list" class="flex flex-wrap gap-1 mb-2 min-h-[30px] p-1 bg-black/20 rounded"></div>
-            <div class="flex gap-1">
-                <button onclick="spawnCustomGame()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 rounded">START CUSTOM</button>
-                <button onclick="clearDeck()" class="px-3 bg-red-900/50 hover:bg-red-800 text-red-300 text-xs font-bold rounded">CLR</button>
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Presets</h3>
-            <button onclick="quickSpawn(['Werewolf', 'Seer', 'Villager'])" class="btn-debug text-xs">3P: Wolf/Seer/Vil</button>
-            <button onclick="quickSpawn(['Werewolf', 'Doctor', 'Seer', 'Villager'])" class="btn-debug text-xs">4P: Classic</button>
-            <button onclick="quickSpawn(['Werewolf', 'Witch', 'Serial Killer', 'Cupid', 'Villager'])" class="btn-debug text-xs">5P: Chaos Mode</button>
-        </div>
-
-        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500 border-t border-slate-700 pt-2">Live Spieleners</h3>
-        <div id="player-list" class="flex-grow overflow-y-auto text-sm"></div>
-    </div>
-
-    <div class="panel flex flex-col bg-gray-950 relative p-0 overflow-hidden">
-        <div id="win-banner">
-            <span id="win-text">WIN CONDITION MET</span>
-            <button onclick="document.getElementById('win-banner').style.display='none'" class="ml-4 text-xs bg-black/30 px-2 py-1 rounded hover:bg-black/50">DISMISS</button>
-        </div>
-
-        <div class="w-full p-2 flex justify-between items-center bg-slate-900 border-b border-slate-800 z-10">
-            <div class="text-xs font-bold bg-black/50 px-2 py-1 rounded">PHASE: <span id="phase-display" class="text-white">INIT</span></div>
-            <div class="text-xs font-bold bg-black/50 px-2 py-1 rounded">TURN: <span id="turn-display" class="text-white">0</span></div>
-        </div>
-        
-        <div class="flex-grow flex items-center justify-center p-4">
-            <div id="game-mock-container"><div class="text-center text-gray-500 py-10">Select roles to start...</div></div>
-        </div>
-
-        <div class="w-full p-2 bg-slate-900 border-t border-slate-800 z-10 flex gap-2">
-            <button onclick="forceNextTurn()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-3 rounded border border-slate-700">
-                ⏭ NEXT ROLE
+<div class="panel">
+<h2 class="text-lg font-bold text-white mb-2">BAUER</h2>
+<div class="mb-4 bg-slate-900 p-2 rounded border border-slate-800">
+<h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Verfügbare Rollen</h3>
+<div class="flex flex-wrap gap-1 mb-2" id="role-selector"></div>
+<h3 class="text-xs font-bold uppercase mb-1 text-gray-500">Aktuelles Deck (<span id="deck-count">0</span>)</h3>
+<div class="flex flex-wrap gap-1 mb-2 min-h-[30px] p-1 bg-black/20 rounded" id="custom-deck-list"></div>
+<div class="flex gap-1">
+<button class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 rounded" onclick="spawnCustomGame()">BENUTZERDEFINIERT STARTEN</button>
+<button class="px-3 bg-red-900/50 hover:bg-red-800 text-red-300 text-xs font-bold rounded" onclick="clearDeck()">CLR</button>
+</div>
+</div>
+<div class="mb-4">
+<h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Voreinstellungen</h3>
+<button class="btn-debug text-xs" onclick="quickSpawn(['Werewolf', 'Seer', 'Villager'])">3P: Wolf/Seher/Vil</button>
+<button class="btn-debug text-xs" onclick="quickSpawn(['Werewolf', 'Doctor', 'Seer', 'Villager'])">4P: Klassisch</button>
+<button class="btn-debug text-xs" onclick="quickSpawn(['Werewolf', 'Witch', 'Serial Killer', 'Cupid', 'Villager'])">5P: Chaos-Modus</button>
+</div>
+<h3 class="text-xs font-bold uppercase mb-2 text-gray-500 border-t border-slate-700 pt-2">Live-Spieler</h3>
+<div class="flex-grow overflow-y-auto text-sm" id="player-list"></div>
+</div>
+<div class="panel flex flex-col bg-gray-950 relative p-0 overflow-hidden">
+<div id="win-banner">
+<span id="win-text">GEWINNBEDINGUNG ERFÜLLT</span>
+<button class="ml-4 text-xs bg-black/30 px-2 py-1 rounded hover:bg-black/50" onclick="document.getElementById('win-banner').style.display='none'">ZÜRÜCKWEISEN</button>
+</div>
+<div class="w-full p-2 flex justify-between items-center bg-slate-900 border-b border-slate-800 z-10">
+<div class="text-xs font-bold bg-black/50 px-2 py-1 rounded">PHASE: <span class="text-white" id="phase-display">INIT</span></div>
+<div class="text-xs font-bold bg-black/50 px-2 py-1 rounded">DREHEN: <span class="text-white" id="turn-display">0</span></div>
+</div>
+<div class="flex-grow flex items-center justify-center p-4">
+<div id="game-mock-container"><div class="text-center text-gray-500 py-10">Wählen Sie die zu startenden Rollen aus...</div></div>
+</div>
+<div class="w-full p-2 bg-slate-900 border-t border-slate-800 z-10 flex gap-2">
+<button class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-3 rounded border border-slate-700" onclick="forceNextTurn()">
+                ⏭ NÄCHSTE ROLLE
             </button>
-            <button onclick="forceNextPhase()" class="flex-1 bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold py-3 rounded border border-indigo-700">
-                ☀️/🌑 NEXT PHASE
+<button class="flex-1 bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold py-3 rounded border border-indigo-700" onclick="forceNextPhase()">
+                ☀️/🌑 NÄCHSTE PHASE
             </button>
-        </div>
-    </div>
-
-    <div class="panel">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-bold text-white">CONSOLE</h2>
-            <button onclick="clearConsole()" class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded">CLEAR</button>
-        </div>
-        <div id="console-log" class="flex-grow font-mono overflow-y-auto mb-4 bg-black/20 p-2 rounded"></div>
-        <h3 class="text-xs font-bold uppercase mb-2 text-gray-500">State Dump</h3>
-        <pre id="data-dump" class="text-[10px] text-gray-400 overflow-x-auto bg-black/20 p-2 rounded max-h-32"></pre>
-        <button onclick="checkWinCondition()" class="btn-debug mt-4 border-green-800 text-green-400 text-center text-xs">CHECK WIN CONDITION</button>
-    </div>
-
-    <script>
+</div>
+</div>
+<div class="panel">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-lg font-bold text-white">KONSOLE</h2>
+<button class="text-xs bg-slate-700 hover:bg-slate-600 text-white px-2 py-1 rounded" onclick="clearConsole()">KLAR</button>
+</div>
+<div class="flex-grow font-mono overflow-y-auto mb-4 bg-black/20 p-2 rounded" id="console-log"></div>
+<h3 class="text-xs font-bold uppercase mb-2 text-gray-500">Staatsdeponie</h3>
+<pre class="text-[10px] text-gray-400 overflow-x-auto bg-black/20 p-2 rounded max-h-32" id="data-dump"></pre>
+<button class="btn-debug mt-4 border-green-800 text-green-400 text-center text-xs" onclick="checkWinCondition()">GEWINNBEDINGUNG ÜBERPRÜFEN</button>
+</div>
+<script>
         const CDN_BASE = "https://cdn.fynn.qzz.io/Werewolf";
         let ROLES_DB = {};
         let customDeck = [];
