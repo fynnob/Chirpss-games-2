@@ -1,3 +1,38 @@
+ pkill -f nano
+ python3 -c "
+with open('/home/fynn/Desktop/Chirpss-games-2/layout.js', 'r') as f:
+    text = f.read()
+
+import re
+# remove everything after window.changeLanguage function
+idx = text.find('window.changeLanguage = function')
+if idx != -1:
+    end_idx = text.find('};', idx) + 2
+    clean_text = text[:end_idx] + '\n\n'
+    
+    # re-append clean PWA code 
+    pwa = '''// PWA: Inject Manifest & Register Service Worker
+if (document.querySelector('link[rel=\"manifest\"]') === null) {
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = '/manifest.json';
+    document.head.appendChild(manifestLink);
+}
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('ServiceWorker registered successfully'))
+            .catch(err => console.log('ServiceWorker registration failed: ', err));
+    });
+}
+'''
+    clean_text += pwa
+    
+    with open('/home/fynn/Desktop/Chirpss-games-2/layout.js', 'w') as f:
+        f.write(clean_text)
+    print('Cleaned up layout.js')
+"
 /**
  * layout.js - 2026 Edition
  * Modern Colors + Classic Layout Support
@@ -93,6 +128,52 @@ window.changeLanguage = function(selectObject) {
     if (lang.toLowerCase() === 'de') window.location.href = 'https://gc.fynn.qzz.io/De/';
 };
 
+// PWA: Inject Manifest & Register Service Worker
+if (!document.querySelector('link[rel="manifest"]')) {
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = '/manifest.json';
+    document.head.appendChild(manifestLink);
+}
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('ServiceWorker registered successfully'))
+            .catch(err => console.log('ServiceWorker registration failed: ', err));
+    });
+}
+
+// PWA: Inject Manifest & Register Service Worker
+if (!document.querySelector('link[rel="manifest"]')) {
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = '/manifest.json';
+    document.head.appendChild(manifestLink);
+}
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('ServiceWorker registered successfully'))
+            .catch(err => console.log('ServiceWorker registration failed: ', err));
+    });
+}
+
+// PWA: Inject Manifest & Register Service Worker
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'manifest';
+    manifestLink.href = '/manifest.json';
+    document.head.appendChild(manifestLink);
+}
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('ServiceWorker registered successfully'))
+            .catch(err => console.log('ServiceWorker registration failed: ', err));
+    });
+}
 
 // PWA: Inject Manifest & Register Service Worker
 if (document.querySelector('link[rel="manifest"]') === null) {
